@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OXYDE - Create your online store in five minutes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OXYDE">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<style>
+
+  /* Ambient background mesh */
+  body { position: relative; }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 12% -8%, rgba(99,102,241,.16), transparent 42%),
+      radial-gradient(circle at 88% 8%, rgba(139,92,246,.13), transparent 40%),
+      radial-gradient(circle at 50% 105%, rgba(16,185,129,.07), transparent 45%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(148,163,184,.10) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+    mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+  }
+  ::selection { background: rgba(99,102,241,.35); color: #fff; }
+  *:focus-visible { outline: 2px solid rgba(99,102,241,.7); outline-offset: 2px; border-radius: 10px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border: 3px solid transparent; background-clip: content-box; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; background-clip: content-box; }
+  /* Glass-ring panels: gradient hairline border without touching layout */
+  .panel { position: relative; isolation: isolate; }
+  .panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(140deg, rgba(129,140,248,.4), rgba(255,255,255,.04) 32%, rgba(167,139,250,.22) 68%, rgba(255,255,255,.03));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; opacity: .55;
+  }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Language Switcher -->
+    <div class="flex justify-end gap-2 px-6 pt-4 max-w-7xl mx-auto">
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition active [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="fr" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="ar" onclick="setLang('ar')">AR</button>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-900">
+        <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" class="flex items-center gap-2.5 group cursor-pointer">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-600/30 group-hover:shadow-indigo-500/50 group-hover:scale-105 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <span class="text-xl font-black tracking-wider bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OXYDE</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+            <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" class="hover:text-indigo-400 transition" id="navHome">Home</a>
+            <a href="#pricing" class="hover:text-indigo-400 transition" id="navPricing">Pricing</a>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            <a href="login.html" class="text-sm font-medium text-slate-300 hover:text-indigo-400 transition" id="navLogin">Login</a>
+            <a href="register.html" class="bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 text-white text-sm font-medium px-5 py-2.5 rounded-full transition shadow-md" id="navStartTrial">Start Free Trial</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="text-center px-4 py-20 max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-6" id="heroBadge">
+            ✨ OXYDE's store is finally here! Start now - for free →
+        </div>
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6" id="heroTitle">
+            Create your online store <br>in five minutes
+        </h1>
+        <p class="text-lg text-slate-400 mb-8 max-w-xl mx-auto" id="heroSubtitle">
+            Simple enough for anyone, smart enough to scale.
+        </p>
+        <div>
+            <a href="register.html" class="bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 text-white font-medium px-8 py-4 rounded-full text-base transition shadow-lg inline-block" id="heroCta">
+                Start now - for free
+            </a>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-slate-900/50 border-t border-slate-900 px-4">
+        <div class="max-w-6xl mx-auto text-center mb-16">
+            <h2 class="text-3xl font-bold text-white mb-3" id="pricingTitle">Write your story, today</h2>
+            <p class="text-slate-400" id="pricingSubtitle">Choose the right plan for your business growth</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- GOLD -->
+            <div class="bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-8 flex flex-col justify-between shadow-sm relative hover:border-slate-700 transition">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-950/80 border border-purple-500/30 text-purple-300 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full" id="goldBadge">
+                    Pay As You Go
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-white mt-2">GOLD</h3>
+                    <p class="text-xs text-slate-400 mt-1 mb-4" id="goldTagline">Best for beginners</p>
+
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="text-3xl font-extrabold text-white">
+                            1,800 <span class="text-sm font-normal text-slate-400 perMoSpan">DZD / mo</span>
+                        </div>
+                        <span class="text-xs text-indigo-400 font-medium" id="goldOrdersNote">for 150 orders — no expiry</span>
+                    </div>
+
+                    <div class="space-y-3.5 text-sm text-slate-300 border-t border-slate-800/80 pt-6 mb-8 text-left">
+                        <div class="flex items-center gap-3"><span>✨</span> <span class="feat-ai">AI Features</span></div>
+                        <div class="flex items-center gap-3"><span>🎨</span> <span class="feat-themes">+3 Theme</span></div>
+                        <div class="flex items-center gap-3"><span>📦</span> <span class="feat-variants">Variants</span></div>
+                        <div class="flex items-center gap-3"><span>♾️</span> <span class="feat-pixel">Meta/TikTok Pixel</span></div>
+                        <div class="flex items-center gap-3"><span>📈</span> <span class="feat-analytics">Advanced Analytics</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>💳</span> <span class="feat-stripe">Stripe Payment Gateway</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>🗄️</span> <span class="feat-sku">SKU & Stock Management</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>🛍️</span> <span class="feat-upsell">Upsell and Cross-Sell</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>🚚</span> <span class="feat-delivery">Delivery Company Integrations</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>📊</span> <span class="feat-gsheet">Google Sheet Integration</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>👥</span> <span class="feat-leads">Leads</span></div>
+                    </div>
+                </div>
+                <a href="register.html" class="w-full bg-slate-800 hover:bg-gradient-to-br hover:from-indigo-500 hover:to-violet-600 text-white font-medium py-3 rounded-2xl transition text-center text-sm block border border-slate-700 hover:border-indigo-600 plan-cta">
+                    Start free trial
+                </a>
+            </div>
+
+            <!-- DIAMOND -->
+            <div class="bg-slate-900 border-2 border-indigo-600 rounded-3xl p-8 flex flex-col justify-between shadow-xl relative">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mt-2">DIAMOND</h3>
+                    <p class="text-xs text-indigo-400 font-medium mt-1 mb-6" id="diamondTagline">Best for most people</p>
+                    <div class="text-3xl font-extrabold text-white mb-6">
+                        3,000 <span class="text-sm font-normal text-slate-400 perMoSpan">DZD / mo</span>
+                    </div>
+
+                    <div class="space-y-3.5 text-sm text-slate-300 border-t border-slate-800/80 pt-6 mb-8 text-left">
+                        <div class="flex items-center gap-3"><span>✨</span> <span class="feat-ai">AI Features</span></div>
+                        <div class="flex items-center gap-3"><span>🎨</span> <span class="feat-themes">+3 Theme</span></div>
+                        <div class="flex items-center gap-3"><span>📦</span> <span class="feat-variants">Variants</span></div>
+                        <div class="flex items-center gap-3"><span>♾️</span> <span class="feat-pixel">Meta/TikTok Pixel</span></div>
+                        <div class="flex items-center gap-3"><span>📈</span> <span class="feat-analytics">Advanced Analytics</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>💳</span> <span class="feat-stripe">Stripe Payment Gateway</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>🌐</span> <span class="feat-domain">Custom Domain</span></div>
+                        <div class="flex items-center gap-3"><span>🗄️</span> <span class="feat-sku">SKU & Stock Management</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>🛍️</span> <span class="feat-upsell">Upsell and Cross-Sell</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>🚚</span> <span class="feat-delivery">Delivery Company Integrations</span></div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3"><span>📊</span> <span class="feat-gsheet">Google Sheet Integration</span></div>
+                            <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded border border-slate-700 feat-soon">Coming Soon</span>
+                        </div>
+                        <div class="flex items-center gap-3"><span>👥</span> <span class="feat-leads">Leads</span></div>
+                    </div>
+                </div>
+                <a href="register.html" class="w-full bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 text-white font-medium py-3 rounded-2xl transition text-center text-sm block shadow-md plan-cta">
+                    Start free trial
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compare Plans -->
+    <section class="py-16 px-4 border-t border-slate-900">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-white text-center mb-8" id="cpTitle">Compare Plans</h2>
+            <div class="overflow-x-auto bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-6 sm:p-8">
+                <table class="w-full text-sm min-w-[560px]">
+                    <thead>
+                        <tr class="border-b border-slate-800">
+                            <th class="text-left font-medium text-slate-500 pb-3 pr-4" id="cpFeature">Feature</th>
+                            <th class="text-center font-bold text-slate-300 pb-3 px-3">🆓 Free</th>
+                            <th class="text-center font-bold text-amber-400 pb-3 px-3">🥇 Gold</th>
+                            <th class="text-center font-bold text-indigo-400 pb-3 px-3">💎 Diamond</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cpBody" class="divide-y divide-slate-800/60"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+<script>
+const i18n = {
+  en: {
+    navHome: "Home", navPricing: "Pricing", navLogin: "Login", navStartTrial: "Start Free Trial",
+    heroBadge: "✨ OXYDE's store is finally here! Start now - for free →",
+    heroTitleLine1: "Create your online store", heroTitleLine2: "in five minutes",
+    heroSubtitle: "Simple enough for anyone, smart enough to scale.",
+    heroCta: "Start now - for free",
+    pricingTitle: "Write your story, today", pricingSubtitle: "Choose the right plan for your business growth",
+    goldBadge: "Pay As You Go", goldTagline: "Best for beginners", goldOrdersNote: "for 150 orders — no expiry",
+    diamondTagline: "Best for most people", perMo: "DZD / mo",
+    featAi: "AI Features", featThemes: "+3 Theme", featVariants: "Variants", featPixel: "Meta/TikTok Pixel",
+    featAnalytics: "Advanced Analytics", featStripe: "Stripe Payment Gateway", featSku: "SKU & Stock Management",
+    featUpsell: "Upsell and Cross-Sell", featDelivery: "Delivery Company Integrations", featGsheet: "Google Sheet Integration",
+    featLeads: "Leads", featDomain: "Custom Domain", featSoon: "Coming Soon",
+    planCta: "Start free trial",
+  },
+  fr: {
+    navHome: "Accueil", navPricing: "Tarifs", navLogin: "Connexion", navStartTrial: "Essai Gratuit",
+    heroBadge: "✨ La boutique OXYDE est enfin la ! Commencez gratuitement →",
+    heroTitleLine1: "Creez votre boutique en ligne", heroTitleLine2: "en cinq minutes",
+    heroSubtitle: "Assez simple pour tous, assez puissant pour grandir.",
+    heroCta: "Commencer gratuitement",
+    pricingTitle: "Ecrivez votre histoire, aujourd'hui", pricingSubtitle: "Choisissez le bon plan pour la croissance de votre business",
+    goldBadge: "Paiement a l'usage", goldTagline: "Ideal pour debuter", goldOrdersNote: "pour 150 commandes — sans expiration",
+    diamondTagline: "Ideal pour la plupart", perMo: "DZD / mois",
+    featAi: "Fonctions IA", featThemes: "+3 Themes", featVariants: "Variantes", featPixel: "Pixel Meta/TikTok",
+    featAnalytics: "Statistiques Avancees", featStripe: "Passerelle de Paiement Stripe", featSku: "Gestion SKU & Stock",
+    featUpsell: "Vente Additionnelle", featDelivery: "Integrations Livraison", featGsheet: "Integration Google Sheet",
+    featLeads: "Leads", featDomain: "Domaine Personnalise", featSoon: "Bientot",
+    planCta: "Essai gratuit",
+  },
+  ar: {
+    navHome: "الرئيسية", navPricing: "الأسعار", navLogin: "تسجيل الدخول", navStartTrial: "ابدأ تجربة مجانية",
+    heroBadge: "✨ متجر OXYDE وصل أخيراً! ابدأ الآن مجاناً ←",
+    heroTitleLine1: "أنشئ متجرك الإلكتروني", heroTitleLine2: "فـ خمس دقائق",
+    heroSubtitle: "بسيط بزاف لأي حد، وقوي بزاف باش يكبر معاك.",
+    heroCta: "ابدأ الآن مجاناً",
+    pricingTitle: "اكتب قصتك، اليوم", pricingSubtitle: "اختر الخطة المناسبة لنمو تجارتك",
+    goldBadge: "دفع حسب الاستعمال", goldTagline: "الأنسب للمبتدئين", goldOrdersNote: "لـ150 طلبية — بلا انتهاء",
+    diamondTagline: "الأنسب لمعظم الناس", perMo: "دج / شهر",
+    featAi: "ميزات الذكاء الاصطناعي", featThemes: "+3 قوالب", featVariants: "الفاريانتس", featPixel: "بيكسل Meta/TikTok",
+    featAnalytics: "إحصائيات متقدمة", featStripe: "بوابة دفع Stripe", featSku: "إدارة SKU والمخزون",
+    featUpsell: "بيع إضافي (Upsell)", featDelivery: "ربط شركات التوصيل", featGsheet: "ربط Google Sheet",
+    featLeads: "Leads", featDomain: "دومين مخصص", featSoon: "قريباً",
+    planCta: "ابدأ تجربة مجانية",
+  },
+};
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function setLang(lang) {
+  const t = i18n[lang];
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+  document.getElementById('navHome').textContent = t.navHome;
+  document.getElementById('navPricing').textContent = t.navPricing;
+  document.getElementById('navLogin').textContent = t.navLogin;
+  document.getElementById('navStartTrial').textContent = t.navStartTrial;
+  document.getElementById('heroBadge').textContent = t.heroBadge;
+  document.getElementById('heroTitle').innerHTML = escapeHtml(t.heroTitleLine1) + '<br>' + escapeHtml(t.heroTitleLine2);
+  document.getElementById('heroSubtitle').textContent = t.heroSubtitle;
+  document.getElementById('heroCta').textContent = t.heroCta;
+  document.getElementById('pricingTitle').textContent = t.pricingTitle;
+  document.getElementById('pricingSubtitle').textContent = t.pricingSubtitle;
+  document.getElementById('goldBadge').textContent = t.goldBadge;
+  document.getElementById('goldTagline').textContent = t.goldTagline;
+  document.getElementById('goldOrdersNote').textContent = t.goldOrdersNote;
+  document.getElementById('diamondTagline').textContent = t.diamondTagline;
+  document.querySelectorAll('.perMoSpan').forEach(el => el.textContent = t.perMo);
+
+  document.querySelectorAll('.feat-ai').forEach(el => el.textContent = t.featAi);
+  document.querySelectorAll('.feat-themes').forEach(el => el.textContent = t.featThemes);
+  document.querySelectorAll('.feat-variants').forEach(el => el.textContent = t.featVariants);
+  document.querySelectorAll('.feat-pixel').forEach(el => el.textContent = t.featPixel);
+  document.querySelectorAll('.feat-analytics').forEach(el => el.textContent = t.featAnalytics);
+  document.querySelectorAll('.feat-stripe').forEach(el => el.textContent = t.featStripe);
+  document.querySelectorAll('.feat-sku').forEach(el => el.textContent = t.featSku);
+  document.querySelectorAll('.feat-upsell').forEach(el => el.textContent = t.featUpsell);
+  document.querySelectorAll('.feat-delivery').forEach(el => el.textContent = t.featDelivery);
+  document.querySelectorAll('.feat-gsheet').forEach(el => el.textContent = t.featGsheet);
+  document.querySelectorAll('.feat-leads').forEach(el => el.textContent = t.featLeads);
+  document.querySelectorAll('.feat-domain').forEach(el => el.textContent = t.featDomain);
+  document.querySelectorAll('.feat-soon').forEach(el => el.textContent = t.featSoon);
+  document.querySelectorAll('.plan-cta').forEach(el => el.textContent = t.planCta);
+
+  document.title = (lang === 'ar' ? 'OXYDE - أنشئ متجرك الإلكتروني فـ خمس دقائق' : lang === 'fr' ? 'OXYDE - Creez votre boutique en 5 minutes' : "OXYDE - Create your online store in five minutes");
+
+  if (lang === 'ar') {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
+  } else {
+    document.documentElement.dir = 'ltr';
+    document.documentElement.lang = lang;
+  }
+
+  renderComparePlans(lang);
+}
+
+const compareData = {
+  en: {
+    title: 'Compare Plans', feature: 'Feature', unlimited: 'Unlimited',
+    rows: [
+      ['Products', '5', '20', 'Unlimited'],
+      ['Orders / month', '20', '150', 'Unlimited'],
+      ['Funnels', '5', '20', 'Unlimited'],
+      ['Variants', true, true, true],
+      ['AI Generations / month', '10', '20', 'Unlimited'],
+      ['Gallery Photos / product', '3', '3', '8'],
+      ['Sales Boosters & Discounts', true, true, true],
+      ['Leads CRM', true, true, true],
+      ['Push Notifications', true, true, true],
+      ['AI Support Chat', true, true, true],
+      ['Premium Templates', false, true, true],
+      ['Meta / TikTok Pixel', true, true, true],
+      ['Coupon Codes', false, false, true],
+      ['CSV Bulk Import/Export', false, false, true],
+      ['Custom Domain', false, false, true],
+      ['Remove "Powered by Oxyde"', false, false, true],
+    ],
+  },
+  fr: {
+    title: 'Comparer les Plans', feature: 'Fonctionnalité', unlimited: 'Illimité',
+    rows: [
+      ['Produits', '5', '20', 'Illimité'],
+      ['Commandes / mois', '20', '150', 'Illimité'],
+      ['Funnels', '5', '20', 'Illimité'],
+      ['Variantes', true, true, true],
+      ['Générations IA / mois', '10', '20', 'Illimité'],
+      ['Photos galerie / produit', '3', '3', '8'],
+      ['Boosters de Vente & Réductions', true, true, true],
+      ['Leads CRM', true, true, true],
+      ['Notifications Push', true, true, true],
+      ['Chat Support IA', true, true, true],
+      ['Modèles Premium', false, true, true],
+      ['Pixel Meta / TikTok', true, true, true],
+      ['Codes de Réduction', false, false, true],
+      ['Import/Export CSV', false, false, true],
+      ['Domaine Personnalisé', false, false, true],
+      ['Retirer "Powered by Oxyde"', false, false, true],
+    ],
+  },
+  ar: {
+    title: 'قارن الخطط', feature: 'الميزة', unlimited: 'بلا حدود',
+    rows: [
+      ['المنتجات', '5', '20', 'بلا حدود'],
+      ['الطلبيات / شهرياً', '20', '150', 'بلا حدود'],
+      ['الفانلز', '5', '20', 'بلا حدود'],
+      ['الفاريانتس', true, true, true],
+      ['توليدات AI / شهرياً', '10', '20', 'بلا حدود'],
+      ['صور المعرض / منتج', '3', '3', '8'],
+      ['Sales Boosters والتخفيضات', true, true, true],
+      ['Leads CRM', true, true, true],
+      ['الإشعارات الفورية', true, true, true],
+      ['شات الدعم الذكي', true, true, true],
+      ['قوالب مميزة', false, true, true],
+      ['بيكسل Meta / TikTok', true, true, true],
+      ['أكواد الخصم', false, false, true],
+      ['استيراد/تصدير CSV بالجملة', false, false, true],
+      ['دومين مخصص', false, false, true],
+      ['حذف "powered by Oxyde"', false, false, true],
+    ],
+  },
+};
+
+function renderComparePlans(lang) {
+  const d = compareData[lang] || compareData.en;
+  document.getElementById('cpTitle').textContent = d.title;
+  document.getElementById('cpFeature').textContent = d.feature;
+  const check = '<span class="inline-flex w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 items-center justify-center">✓</span>';
+  const cross = '<span class="inline-flex w-5 h-5 rounded-full bg-slate-800 text-slate-600 items-center justify-center">✕</span>';
+  const cell = (v) => v === true ? check : v === false ? cross : `<span class="font-mono text-xs">${v}</span>`;
+  document.getElementById('cpBody').innerHTML = d.rows.map(([label, free, gold, diamond]) => `
+    <tr>
+      <td class="py-3 pr-4 text-slate-300">${label}</td>
+      <td class="py-3 px-3 text-center text-slate-400">${cell(free)}</td>
+      <td class="py-3 px-3 text-center text-slate-400">${cell(gold)}</td>
+      <td class="py-3 px-3 text-center text-slate-300">${cell(diamond)}</td>
+    </tr>
+  `).join('');
+}
+
+setLang('en');
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

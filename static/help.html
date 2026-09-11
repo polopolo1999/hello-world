@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center — OXYDE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { dark: { bg: '#0f172a', card: '#1e293b', border: '#334155' } } } }
+        }
+    </script>
+    <style>
+
+  /* Ambient background mesh */
+  body { position: relative; }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 12% -8%, rgba(99,102,241,.16), transparent 42%),
+      radial-gradient(circle at 88% 8%, rgba(139,92,246,.13), transparent 40%),
+      radial-gradient(circle at 50% 105%, rgba(16,185,129,.07), transparent 45%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(148,163,184,.10) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+    mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+  }
+  ::selection { background: rgba(99,102,241,.35); color: #fff; }
+  *:focus-visible { outline: 2px solid rgba(99,102,241,.7); outline-offset: 2px; border-radius: 10px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border: 3px solid transparent; background-clip: content-box; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; background-clip: content-box; }
+  /* Glass-ring panels: gradient hairline border without touching layout */
+  .panel { position: relative; isolation: isolate; }
+  .panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(140deg, rgba(129,140,248,.4), rgba(255,255,255,.04) 32%, rgba(167,139,250,.22) 68%, rgba(255,255,255,.03));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; opacity: .55;
+  }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+        .accordion-item.open .accordion-content { max-height: 600px; }
+        .accordion-item.open .chevron { transform: rotate(180deg); }
+    </style>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OXYDE">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Language Switcher -->
+    <div class="flex justify-end gap-2 px-6 pt-4 max-w-4xl mx-auto">
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition active [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="fr" onclick="setLang('fr')">FR</button>
+        <button class="lang-btn px-3 py-1 rounded-lg text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition [&.active]:bg-gradient-to-r [&.active]:from-indigo-500 [&.active]:to-violet-600 [&.active]:text-white [&.active]:shadow-lg [&.active]:shadow-indigo-600/30 [&.active]:border-indigo-600" data-lang="ar" onclick="setLang('ar')">AR</button>
+    </div>
+
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 max-w-4xl mx-auto w-full border-b border-slate-900">
+        <a href="dashboard.html" class="flex items-center gap-2.5 group cursor-pointer" style="text-decoration:none;">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-600/30 group-hover:shadow-indigo-500/50 group-hover:scale-105 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <span class="text-xl font-black tracking-wider bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OXYDE</span>
+        </a>
+        <a href="dashboard.html" id="backLink" class="text-sm font-medium text-slate-400 hover:text-white transition bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl" style="text-decoration:none;">← Back to Dashboard</a>
+    </header>
+
+    <main class="max-w-4xl mx-auto w-full px-4 py-10">
+        <div class="text-center mb-10">
+            <div class="text-xs font-semibold text-indigo-400 tracking-wider uppercase mb-2">HELP CENTER</div>
+            <h1 id="pageTitle" class="text-3xl font-bold text-white mb-2">Help Center</h1>
+            <p id="pageSubtitle" class="text-sm text-slate-400">Everything you need to know to get the most out of OXYDE</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+            <a href="#getting-started" class="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-4 text-center transition" style="text-decoration:none;">
+                <div class="text-2xl mb-1">🚀</div>
+                <div class="text-xs font-medium text-slate-200" id="qlink1">Getting Started</div>
+            </a>
+            <a href="#products" class="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-4 text-center transition" style="text-decoration:none;">
+                <div class="text-2xl mb-1">🛍️</div>
+                <div class="text-xs font-medium text-slate-200" id="qlink2">Products</div>
+            </a>
+            <a href="#subscription" class="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-4 text-center transition" style="text-decoration:none;">
+                <div class="text-2xl mb-1">💎</div>
+                <div class="text-xs font-medium text-slate-200" id="qlink3">Subscription</div>
+            </a>
+            <a href="#advanced" class="bg-slate-900 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-4 text-center transition" style="text-decoration:none;">
+                <div class="text-2xl mb-1">⚙️</div>
+                <div class="text-xs font-medium text-slate-200" id="qlink4">Advanced</div>
+            </a>
+        </div>
+
+        <div class="mb-8" id="getting-started">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>🚀</span> <span id="sectionTitle1">Getting Started</span></h2>
+            <div class="space-y-3" id="accordion-1"></div>
+        </div>
+
+        <div class="mb-8" id="products">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>🛍️</span> <span id="sectionTitle2">Products & Orders</span></h2>
+            <div class="space-y-3" id="accordion-2"></div>
+        </div>
+
+        <div class="mb-8" id="subscription">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>💎</span> <span id="sectionTitle3">Subscription & Plans</span></h2>
+            <div class="space-y-3" id="accordion-3"></div>
+        </div>
+
+        <div class="mb-8" id="advanced">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span>⚙️</span> <span id="sectionTitle4">Advanced Features</span></h2>
+            <div class="space-y-3" id="accordion-4"></div>
+        </div>
+
+        <div class="bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-8 text-center mt-10">
+            <div class="text-2xl mb-2">💬</div>
+            <h2 id="contactTitle" class="text-lg font-bold text-white mb-1">Still have a question?</h2>
+            <p id="contactSubtitle" class="text-sm text-slate-400">Get in touch with us and we'll help you out quickly</p>
+        </div>
+    </main>
+
+<script>
+const i18n = {
+  en: {
+    backLink: "← Back to Dashboard", pageTitle: "Help Center", pageSubtitle: "Everything you need to know to get the most out of OXYDE",
+    qlink1: "Getting Started", qlink2: "Products", qlink3: "Subscription", qlink4: "Advanced",
+    sectionTitle1: "Getting Started", sectionTitle2: "Products & Orders", sectionTitle3: "Subscription & Plans", sectionTitle4: "Advanced Features",
+    contactTitle: "Still have a question?", contactSubtitle: "Get in touch with us and we'll help you out quickly",
+    faqs: {
+      'accordion-1': [
+        { q: 'How do I create my first store?', a: 'From "Your Stores" click "+ New Store", enter the store name and subdomain (its URL), pick a template, and click "Create". Your first store automatically gets a 7-day free Diamond trial with all features.' },
+        { q: 'What does the subdomain mean?', a: 'It is the link your customers will use to reach your store, e.g. mystore.mvpdz.com. Lowercase letters, numbers, and hyphens only, 3-30 characters.' },
+        { q: 'Can I change the template after creating the store?', a: 'Yes, click Edit on the store from your dashboard. Premium templates (Modern, Minimal) require an active Gold or Diamond plan.' },
+      ],
+      'accordion-2': [
+        { q: 'How do I add a new product?', a: 'From the "Products" tab click "+ New Product", fill in the name, price, and quantity, and add an image. You can use the "Generate with AI" button to auto-generate a description or image.' },
+        { q: 'What is the maximum number of products?', a: 'Free = 5 products, Gold = 20 products, Diamond = unlimited.' },
+        { q: 'How do I add colors/sizes to a product (Variants)?', a: 'Inside the product edit form, find the "Variants" section, add the variant name (e.g. "Red - L"), an optional custom price, and quantity.' },
+        { q: 'How do I run a discount/sale on a product?', a: 'Enable "Enable countdown offer" in the product edit form, then fill in the "Original Price" field with the higher price. Keep the regular "Price" field as your discounted price. Customers will see the original price crossed out with a discount badge. When the countdown ends, the price automatically reverts to the original price.' },
+        { q: 'How do I export orders to an Excel file?', a: 'From the "Orders" tab, click "Export CSV" at the top, a file with all your orders will download and it opens directly in Excel.' },
+      ],
+      'accordion-3': [
+        { q: 'What is the difference between Free, Gold, and Diamond?', a: 'Free: 5 products, 20 orders/month, 1 template. Gold: 20 products, 150 orders/month, all templates. Diamond: unlimited products/orders/funnels, Custom Domain, coupon codes, bulk CSV import/export, unlimited AI generations, 8 gallery photos, and no "Powered by Oxyde" branding. See the full comparison table on the Subscription tab.' },
+        { q: 'How do I redeem an activation code?', a: 'From the "Subscription" tab, enter the code in the "Activation Code" field and click "Redeem Code".' },
+        { q: 'How long does the free trial last?', a: '7 days with full Diamond features, only on the first store in your account. Once it ends, the store automatically switches to the Free plan without interruption.' },
+        { q: 'Can I create more than one store?', a: 'Yes, each additional store needs a paid plan (Gold or Diamond), you can enter an activation code directly when creating the new store.' },
+      ],
+      'accordion-4': [
+        { q: 'How do I connect a Custom Domain (Diamond only)?', a: 'From the "Custom Domain" tab, add an A record in your domain DNS settings pointing to the given IP, enter your domain, and save. Then click "Verify Domain" — the platform checks your DNS live and only activates the domain once it correctly points to the server. This can take a few minutes to hours to propagate.' },
+        { q: 'What are Funnels?', a: 'A dedicated landing page for a single product, ideal for direct ad campaigns. Limits: Free=5, Gold=20, Diamond=unlimited.' },
+        { q: 'How do I enable push notifications?', a: 'Click the bell icon at the top, then "Enable Push" and accept the browser permission. You will get notified even when the app is closed.' },
+        { q: 'How do I add a Lead manually?', a: 'From the "Leads" tab, click "Create Lead" and fill in the name and phone. Real orders are added automatically as leads too.' },
+        { q: 'How do I create discount codes (Diamond only)?', a: 'From the "Coupons" tab, click "+ New Coupon", set a code (like WELCOME10), choose percent or fixed amount off, and optionally a usage limit or expiry date. Customers enter the code at checkout.' },
+        { q: 'How do I import/export products in bulk (Diamond only)?', a: 'From the "Products" tab, use "Export CSV" to download all your products, or "Import CSV" to bulk-add products from a CSV file with columns: name, price (required), plus optional description, currency, quantity, sku, image_url.' },
+        { q: 'Is there a limit on AI generations or gallery photos?', a: 'Free gets 10 AI description generations per month, Gold gets 20, and both get 3 extra gallery photos per product. Diamond gets unlimited AI generations and up to 8 gallery photos.' },
+        { q: 'What is the Store Builder?', a: 'A drag-and-drop tool to visually design your storefront home page. Add sections like announcement bar, image banner, featured products, testimonials, image gallery, and a footer with contact info and social links. You can also customize colors and fonts, edit the navigation menu, and add custom pages. Preview your store in Mobile or Desktop view before publishing.' },
+        { q: 'What are Bundles?', a: 'A Bundle groups two or more of your products together at one discounted price. Create one from the "Bundles" tab. It won\'t show to customers automatically — add a "Bundle Offers" section to a page via Store Builder, or rely on the automatic /bundles page. Order revenue is split proportionally between the bundled products.' },
+        { q: 'What is Staff for?', a: 'Add team member names from the "Staff" tab to track who confirms which orders. Staff don\'t get their own login in this version — you assign orders to a staff name yourself from the "Orders" tab. Analytics shows each staff member\'s confirmation rate.' },
+        { q: 'How do I connect a delivery company (Yalidine, ZR Express, Maystro)?', a: 'From "Delivery Settings" > "Delivery Integration", click "Integrate" on the courier and enter its credentials (you get these from your own merchant account with that company). Yalidine keys are verified live; ZR Express and Maystro are saved without live verification. Once connected, a "Ship" button appears on home-delivery orders to create a real parcel and get a tracking number.' },
+        { q: 'What is Stop-Desk delivery pricing?', a: 'From "Delivery Settings" > "Delivery Pricing", you can set two prices per province: Home delivery and Stop-Desk (office pickup). If you set a Stop-Desk price for a province, customers from that province see both delivery options at checkout automatically.' },
+        { q: 'What happens if I delete a store?', a: 'Deleting a store is permanent — it removes all its products, orders, funnels, leads, discount codes, and Store Builder pages at once. If the store has an active paid plan (Gold or Diamond), that subscription is lost permanently with no refund, and you would need a new activation code for any future store. A warning is shown before confirming deletion in this case.' },
+      ],
+    },
+  },
+  fr: {
+    backLink: "← Retour au Tableau de Bord", pageTitle: "Centre d'Aide", pageSubtitle: "Tout ce que vous devez savoir pour tirer le meilleur d'OXYDE",
+    qlink1: "Demarrage", qlink2: "Produits", qlink3: "Abonnement", qlink4: "Avance",
+    sectionTitle1: "Demarrage", sectionTitle2: "Produits & Commandes", sectionTitle3: "Abonnement & Plans", sectionTitle4: "Fonctionnalites Avancees",
+    contactTitle: "Vous avez encore une question ?", contactSubtitle: "Contactez-nous et nous vous aiderons rapidement",
+    faqs: {
+      'accordion-1': [
+        { q: 'Comment creer ma premiere boutique ?', a: 'Depuis "Vos Boutiques" cliquez sur "+ Nouvelle Boutique", entrez le nom et le sous-domaine (son URL), choisissez un modele, et cliquez "Creer". Votre premiere boutique recoit automatiquement un essai gratuit Diamond de 7 jours avec toutes les fonctionnalites.' },
+        { q: 'Que signifie le sous-domaine ?', a: 'C est le lien que vos clients utiliseront pour acceder a votre boutique, ex : maboutique.mvpdz.com. Lettres minuscules, chiffres et tirets uniquement, 3 a 30 caracteres.' },
+        { q: 'Puis-je changer le modele apres la creation ?', a: 'Oui, cliquez sur Modifier sur la boutique depuis votre tableau de bord. Les modeles premium (Modern, Minimal) necessitent un plan Gold ou Diamond actif.' },
+      ],
+      'accordion-2': [
+        { q: 'Comment ajouter un nouveau produit ?', a: 'Depuis l onglet "Produits" cliquez sur "+ Nouveau Produit", remplissez le nom, le prix et la quantite, et ajoutez une image. Vous pouvez utiliser le bouton "Generer avec l IA" pour generer automatiquement une description ou une image.' },
+        { q: 'Quel est le nombre maximum de produits ?', a: 'Free = 5 produits, Gold = 20 produits, Diamond = illimite.' },
+        { q: 'Comment ajouter des couleurs/tailles a un produit (Variantes) ?', a: 'Dans le formulaire de modification du produit, trouvez la section "Variantes", ajoutez le nom de la variante (ex : "Rouge - L"), un prix personnalise optionnel, et la quantite.' },
+        { q: 'Comment faire une promotion/reduction sur un produit ?', a: 'Activez "Enable countdown offer" dans le formulaire de modification du produit, puis remplissez le champ "Original Price" avec le prix le plus eleve. Gardez le champ "Price" habituel comme votre prix reduit. Les clients verront le prix original barre avec un badge de reduction. Quand le compte a rebours se termine, le prix revient automatiquement au prix original.' },
+        { q: 'Comment exporter les commandes vers Excel ?', a: 'Depuis l onglet "Commandes", cliquez sur "Exporter CSV" en haut, un fichier avec toutes vos commandes sera telecharge, il s ouvre directement dans Excel.' },
+      ],
+      'accordion-3': [
+        { q: 'Quelle est la difference entre Free, Gold et Diamond ?', a: 'Free : 5 produits, 20 commandes/mois, 1 modele. Gold : 20 produits, 150 commandes/mois, tous les modeles. Diamond : produits/commandes/funnels illimites, Domaine Personnalise, codes de reduction, import/export CSV en masse, generations IA illimitees, 8 photos de galerie, et sans marque "Powered by Oxyde". Voir le tableau comparatif complet dans l onglet Abonnement.' },
+        { q: 'Comment activer un code d activation ?', a: 'Depuis l onglet "Abonnement", entrez le code dans le champ "Code d activation" et cliquez sur "Activer le code".' },
+        { q: 'Combien de temps dure l essai gratuit ?', a: '7 jours avec toutes les fonctionnalites Diamond, uniquement sur la premiere boutique de votre compte. A la fin, la boutique passe automatiquement au plan Free sans interruption.' },
+        { q: 'Puis-je creer plusieurs boutiques ?', a: 'Oui, chaque boutique supplementaire necessite un plan payant (Gold ou Diamond), vous pouvez entrer un code d activation directement lors de la creation de la nouvelle boutique.' },
+      ],
+      'accordion-4': [
+        { q: 'Comment connecter un Domaine Personnalise (Diamond uniquement) ?', a: 'Depuis l onglet "Domaine Personnalise", ajoutez un enregistrement A dans les parametres DNS de votre domaine pointant vers l IP donnee, entrez votre domaine et enregistrez. Cliquez ensuite sur "Verifier le domaine" — la plateforme verifie votre DNS en direct et n active le domaine que s il pointe correctement vers le serveur. Cela peut prendre quelques minutes a quelques heures.' },
+        { q: 'Que sont les Funnels ?', a: 'Une page de destination dediee a un seul produit, ideale pour les campagnes publicitaires directes. Limites : Free=5, Gold=20, Diamond=illimite.' },
+        { q: 'Comment activer les notifications push ?', a: 'Cliquez sur l icone cloche en haut, puis "Activer Push" et acceptez la permission du navigateur. Vous serez notifie meme lorsque l application est fermee.' },
+        { q: 'Comment ajouter un Lead manuellement ?', a: 'Depuis l onglet "Leads", cliquez sur "Creer un Lead" et remplissez le nom et le telephone. Les vraies commandes sont aussi ajoutees automatiquement comme leads.' },
+        { q: 'Comment creer des codes de reduction (Diamond uniquement) ?', a: 'Depuis l onglet "Coupons", cliquez sur "+ Nouveau Coupon", definissez un code (comme WELCOME10), choisissez un pourcentage ou un montant fixe, et optionnellement une limite d utilisation ou une date d expiration. Les clients entrent le code lors du paiement.' },
+        { q: 'Comment importer/exporter des produits en masse (Diamond uniquement) ?', a: 'Depuis l onglet "Products", utilisez "Export CSV" pour telecharger tous vos produits, ou "Import CSV" pour ajouter des produits en masse depuis un fichier CSV avec les colonnes : name, price (obligatoires), plus description, currency, quantity, sku, image_url en option.' },
+        { q: 'Y a-t-il une limite sur les generations IA ou les photos de galerie ?', a: 'Free a 10 generations de description IA par mois, Gold en a 20, et les deux ont 3 photos de galerie supplementaires par produit. Diamond a des generations IA illimitees et jusqu a 8 photos de galerie.' },
+        { q: 'Qu est-ce que le Store Builder ?', a: 'Un outil de glisser-deposer pour concevoir visuellement la page d accueil de votre boutique. Ajoutez des sections comme barre d annonce, banniere image, produits vedettes, temoignages, galerie d images, et un pied de page avec coordonnees et liens sociaux. Vous pouvez aussi personnaliser les couleurs et polices, modifier le menu de navigation, et ajouter des pages personnalisees. Previsualisez votre boutique en vue Mobile ou Desktop avant de publier.' },
+        { q: 'Que sont les Packs (Bundles) ?', a: 'Un Pack regroupe deux produits ou plus a un seul prix reduit. Creez-en un depuis l onglet "Bundles". Il n apparait pas automatiquement aux clients — ajoutez une section "Offres Groupees" a une page via Store Builder, ou comptez sur la page /bundles automatique. Le revenu de la commande est reparti proportionnellement entre les produits du pack.' },
+        { q: 'A quoi sert le Staff ?', a: 'Ajoutez des noms de membres d equipe depuis l onglet "Staff" pour suivre qui confirme quelles commandes. Le staff n a pas son propre acces dans cette version — vous assignez vous-meme les commandes a un nom depuis l onglet "Orders". Les statistiques montrent le taux de confirmation de chaque membre.' },
+        { q: 'Comment connecter une societe de livraison (Yalidine, ZR Express, Maystro) ?', a: 'Depuis "Delivery Settings" > "Delivery Integration", cliquez sur "Integrer" et entrez les identifiants (obtenus depuis votre propre compte marchand chez cette societe). Les cles Yalidine sont verifiees en direct ; ZR Express et Maystro sont enregistres sans verification en direct. Une fois connecte, un bouton "Expedier" apparait sur les commandes a domicile pour creer un vrai colis et obtenir un numero de suivi.' },
+        { q: 'Qu est-ce que le tarif Stop-Desk ?', a: 'Depuis "Delivery Settings" > "Delivery Pricing", vous pouvez definir deux prix par wilaya : livraison a domicile et Stop-Desk (retrait au bureau). Si vous definissez un prix Stop-Desk pour une wilaya, les clients de cette wilaya voient automatiquement les deux options a la commande.' },
+        { q: 'Que se passe-t-il si je supprime une boutique ?', a: 'Supprimer une boutique est definitif — cela retire tous ses produits, commandes, funnels, leads, codes de reduction et pages Store Builder d un coup. Si la boutique a un abonnement payant actif (Gold ou Diamond), cet abonnement est perdu definitivement sans remboursement, et il vous faudra un nouveau code d activation pour toute future boutique. Un avertissement s affiche avant de confirmer la suppression dans ce cas.' },
+      ],
+    },
+  },
+  ar: {
+    backLink: "← رجوع للوحة التحكم", pageTitle: "مركز المساعدة", pageSubtitle: "كل شي محتاج تعرفو باش تستعمل OXYDE بأحسن طريقة",
+    qlink1: "البداية", qlink2: "المنتجات", qlink3: "الاشتراك", qlink4: "متقدم",
+    sectionTitle1: "البداية", sectionTitle2: "المنتجات والطلبات", sectionTitle3: "الاشتراك والخطط", sectionTitle4: "ميزات متقدمة",
+    contactTitle: "مازال عندك سؤال؟", contactSubtitle: "تواصل معانا مباشرة وغادي نعاونوك بسرعة",
+    faqs: {
+      'accordion-1': [
+        { q: 'كيفاش نفتح أول متجر ليا؟', a: 'من "Your Stores" دوس على "+ New Store"، عمر اسم المتجر والسوبدومين (الرابط ديالو)، اختر القالب، وضغط "Create". أول متجر كيربح تلقائياً تجربة Diamond مجانية لمدة 7 أيام بكل الميزات.' },
+        { q: 'ما معنى السوبدومين (Subdomain)؟', a: 'هو الرابط اللي راح يستعملو الزبائن باش يوصلو لمتجرك، مثلاً: mystore.mvpdz.com. خصو يكون أحرف صغيرة وأرقام وشرطة فقط، من 3 لـ30 حرف.' },
+        { q: 'هل نقدر نبدل القالب من بعد الإنشاء؟', a: 'إيه، من لوحة التحكم دير Edit على المتجر. لكن القوالب المميزة (Modern, Minimal) محتاجة خطة Gold ولا Diamond فعّالة.' },
+      ],
+      'accordion-2': [
+        { q: 'كيفاش نزيد منتج جديد؟', a: 'من تبويب "Products" دوس على "+ New Product"، عمر الاسم والسعر والكمية، وزيد صورة. تقدر تستعمل زر "Generate with AI" باش يولد ليك وصف ولا صورة تلقائياً.' },
+        { q: 'شحال الحد الأقصى ديال المنتجات؟', a: 'Free = 5 منتجات، Gold = 20 منتج، Diamond = بلا حدود.' },
+        { q: 'كيفاش نزيد ألوان/مقاسات لمنتج (Variants)؟', a: 'من داخل تعديل المنتج، تلقى قسم "Variants" — زيد اسم الفاريانت (مثلاً "أحمر - L")، سعر خاص (اختياري)، والكمية.' },
+        { q: 'كيفاش ندير تخفيض على منتج؟', a: 'فعّل "Enable countdown offer" فـ فورم تعديل المنتج، وعمر خانة "Original Price" بالسعر الأصلي (الأعلى). خلي خانة "Price" العادية بالسعر المخفض. الزبون غادي يشوف السعر الأصلي مشطوب مع شارة نسبة التخفيض. كي يسالي العداد التنازلي، السعر كيرجع تلقائياً للسعر الأصلي بلا تدخل منك.' },
+        { q: 'كيفاش نصدر الطلبيات لملف Excel؟', a: 'من تبويب "Orders"، دوس على زر "Export CSV" فوق — غادي يتحمل ليك ملف بكل الطلبيات، تقدر تفتحو بـ Excel مباشرة.' },
+      ],
+      'accordion-3': [
+        { q: 'ما الفرق بين Free و Gold و Diamond؟', a: 'Free: 5 منتجات، 20 طلبية شهرياً، قالب واحد. Gold: 20 منتج، 150 طلبية شهرياً، كل القوالب. Diamond: منتجات/طلبيات/فانلز بلا حدود، Custom Domain، أكواد خصم، استيراد/تصدير CSV بالجملة، توليد AI بلا حدود، 8 صور معرض، وبلا علامة "powered by Oxyde". شوف جدول المقارنة الكامل فـ تبويب Subscription.' },
+        { q: 'كيفاش نفعّل كود تفعيل (Redeem Code)؟', a: 'من تبويب "Subscription"، دخل الكود فـ خانة "Activation Code" ودوس "Redeem Code".' },
+        { q: 'التجربة المجانية (Trial) شحال تدوم؟', a: '7 أيام بميزات Diamond كاملة، غير لأول متجر تخلقو فـ الحساب. كي تسالي، المتجر كيرجع تلقائياً لخطة Free بلا ما يتوقف.' },
+        { q: 'هل نقدر نفتح أكثر من متجر؟', a: 'إيه، كل متجر إضافي محتاج يكون بخطة مدفوعة (Gold ولا Diamond) — تقدر تعطي كود مباشرة عند إنشاء المتجر الجديد.' },
+      ],
+      'accordion-4': [
+        { q: 'كيفاش نربط Custom Domain (Diamond فقط)؟', a: 'من تبويب "Custom Domain"، زيد A record فـ إعدادات الدومين ديالك يشاور على الـ IP المعطى، دخل الدومين واحفظ. بعدها دوس "Verify Domain" — المنصة كتتحقق من الـ DNS ديالك بشكل حي وما تفعّلش الدومين حتى يشاور صحيح على السيرفر. هذا ممكن ياخذ من دقائق لساعات باش ينتشر.' },
+        { q: 'ما هي Funnels؟', a: 'صفحة هبوط مخصصة لمنتج واحد بوحدو، مثالية للإعلانات المباشرة. الحد: Free=5، Gold=20، Diamond=بلا حدود.' },
+        { q: 'كيفاش نفعّل الإشعارات الفورية؟', a: 'اضغط على 🔔 فوق، ثم "Enable Push" ووافق على إذن المتصفح. غادي توصلك إشعارات حتى لو التطبيق مسدود.' },
+        { q: 'كيفاش نزيد Leads يدوياً؟', a: 'من تبويب "Leads"، دوس "Create Lead" وعمر الاسم والهاتف. الطلبيات الحقيقية كتزاد وحدها تلقائياً.' },
+        { q: 'كيفاش ندير أكواد خصم (Diamond بوحدها)؟', a: 'من تبويب "Coupons"، دوس "+ New Coupon"، حط كود (بحال WELCOME10)، اختار نسبة % ولا مبلغ ثابت، وإلا بغيتي حط حد للاستعمال ولا تاريخ انتهاء. الزبون كيدخل الكود فـ صفحة الطلب.' },
+        { q: 'كيفاش نستورد/نصدر منتجات بالجملة (Diamond بوحدها)؟', a: 'من تبويب "Products"، استعمل "Export CSV" باش تحمل كل منتجاتك، ولا "Import CSV" باش تزيد منتجات بالجملة من ملف CSV بالأعمدة: name, price (إجباريين)، وباقي الأعمدة اختيارية (description, currency, quantity, sku, image_url).' },
+        { q: 'كاين حد لتوليد AI ولا صور المعرض؟', a: 'Free: 10 توليدات AI فـ الشهر، Gold: 20 توليدة، وبجوجهم 3 صور إضافية لكل منتج. Diamond: بلا حدود للتوليد وحتى 8 صور.' },
+        { q: 'شنو هي Store Builder؟', a: 'أداة سحب وإفلات باش تبني بصفة بصرية الصفحة الرئيسية لمتجرك. زيد أقسام بحال شريط الإعلانات، بانر صورة، منتجات مميزة، آراء العملاء، معرض صور، وفوتر فيه معلومات التواصل وروابط السوشيال ميديا. تقدر بالمرة تخصص الألوان والخط، تعدل قائمة التنقل، وتزيد صفحات مخصصة. عاين متجرك بوضعية Mobile ولا Desktop قبل النشر.' },
+        { q: 'شنو هي Bundles (العروض التجميعية)؟', a: 'العرض التجميعي كيجمع منتجين أو أكثر بسعر واحد مخفض. خلقو من تبويب "Bundles". ما يبانش تلقائياً للزبون — زيد قسم "عروض تجميعية" لصفحة عبر Store Builder، أو اعتمد على صفحة /bundles الجاهزة أوتوماتيكياً. سعر الطلبية كيتوزع تناسبياً بين المنتجات المكوّنة للعرض.' },
+        { q: 'شنو فايدة Staff؟', a: 'زيد أسماء أعضاء الفريق من تبويب "Staff" باش تتبع شكون أكد شنو من الطلبيات. الموظف ما عندوش دخول خاص بيه فهاذي النسخة — أنت اللي تسند الطلبية لاسم موظف من تبويب "Orders". التحليلات كتوري نسبة تأكيد كل موظف.' },
+        { q: 'كيفاش نربط شركة توصيل (Yalidine، ZR Express، Maystro)؟', a: 'من "Delivery Settings" > "Delivery Integration"، دوس "Integrate" ودخل بيانات الربط (تجيبها من الحساب التجاري ديالك عند الشركة). مفاتيح Yalidine كيتحقق منها بشكل حي؛ ZR Express وMaystro كيتسجلو بلا تحقق حي. بعد الربط، زر "Ship" كيبان فالطلبيات اللي توصيلها للمنزل باش تصنع كولي حقيقي وتجيب رقم تتبع.' },
+        { q: 'شنو هو تسعير Stop-Desk؟', a: 'من "Delivery Settings" > "Delivery Pricing"، تقدر تحدد سعرين لكل ولاية: توصيل للمنزل وStop-Desk (استلام من المكتب). إلا حددت سعر Stop-Desk لولاية معينة، الزبناء من هاذيك الولاية كيشوفو الخيارين تلقائياً وقت الطلب.' },
+        { q: 'شنو كيوقع كي نحذف متجر؟', a: 'حذف المتجر نهائي وبلا رجعة — كيمسح دفعة وحدة كل منتجاتو، طلبياتو، الفانلز، Leads، أكواد الخصم، وصفحات Store Builder. إلا كان المتجر عندو خطة مدفوعة نشطة (Gold ولا Diamond)، الاشتراك كيضيع نهائياً بلا استرجاع، وتحتاج كود تفعيل جديد لأي متجر مستقبلي. كيبان تحذير خاص قبل تأكيد الحذف فـ هاذ الحالة.' },
+      ],
+    },
+  },
+};
+
+let currentLang = 'en';
+
+function renderFaqs(lang) {
+  Object.entries(i18n[lang].faqs).forEach(([containerId, items]) => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = items.map((item) => `
+      <div class="accordion-item bg-slate-900/90 backdrop-blur-xl border border-slate-800/60 rounded-2xl overflow-hidden">
+        <button class="accordion-toggle w-full flex items-center justify-between px-5 py-4 text-left" type="button">
+          <span class="text-sm font-medium text-slate-200">${item.q}</span>
+          <span class="chevron text-slate-500 transition-transform">▾</span>
+        </button>
+        <div class="accordion-content px-5">
+          <p class="text-sm text-slate-400 pb-4">${item.a}</p>
+        </div>
+      </div>
+    `).join('');
+  });
+  document.querySelectorAll('.accordion-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.accordion-item').classList.toggle('open');
+    });
+  });
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = i18n[lang];
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+  document.getElementById('backLink').textContent = t.backLink;
+  document.getElementById('pageTitle').textContent = t.pageTitle;
+  document.getElementById('pageSubtitle').textContent = t.pageSubtitle;
+  document.getElementById('qlink1').textContent = t.qlink1;
+  document.getElementById('qlink2').textContent = t.qlink2;
+  document.getElementById('qlink3').textContent = t.qlink3;
+  document.getElementById('qlink4').textContent = t.qlink4;
+  document.getElementById('sectionTitle1').textContent = t.sectionTitle1;
+  document.getElementById('sectionTitle2').textContent = t.sectionTitle2;
+  document.getElementById('sectionTitle3').textContent = t.sectionTitle3;
+  document.getElementById('sectionTitle4').textContent = t.sectionTitle4;
+  document.getElementById('contactTitle').textContent = t.contactTitle;
+  document.getElementById('contactSubtitle').textContent = t.contactSubtitle;
+  document.title = t.pageTitle + ' — OXYDE';
+
+  if (lang === 'ar') {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
+  } else {
+    document.documentElement.dir = 'ltr';
+    document.documentElement.lang = lang;
+  }
+
+  renderFaqs(lang);
+}
+
+setLang('en');
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

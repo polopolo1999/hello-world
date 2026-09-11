@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="sbHtml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Builder — OXYDE</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+<style>
+  :root {
+    --sb-bg: #0a0a0f; --sb-panel: #12121a; --sb-panel2: #1a1a25; --sb-border: #27273a;
+    --sb-text: #f1f5f9; --sb-faint: #8b8ba3; --sb-accent: #6366f1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; font-family: 'Plus Jakarta Sans','Inter','IBM Plex Sans Arabic',sans-serif; background: var(--sb-bg); color: var(--sb-text); height:100vh; height:100dvh; overflow:hidden;
+    position:relative;
+  }
+  body::before {
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(circle at 10% -10%, rgba(99,102,241,.14), transparent 42%),
+      radial-gradient(circle at 90% 0%, rgba(139,92,246,.10), transparent 40%);
+  }
+  .sb-topbar, .sb-shell, .sb-modal-overlay, .sb-toast { position:relative; z-index:1; }
+
+  .sb-topbar { height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; border-bottom:1px solid var(--sb-border); background:rgba(18,18,26,.75); backdrop-filter: blur(14px); box-shadow: 0 1px 0 0 rgba(99,102,241,.14); }
+  .sb-topbar-left { display:flex; align-items:center; gap:12px; }
+  .sb-back { color: var(--sb-faint); text-decoration:none; font-size:20px; display:inline-flex; align-items:center; justify-content:center; transition: color .15s ease; }
+  .sb-back:hover { color: var(--sb-text); }
+  .sb-page-tabs { display:flex; gap:4px; background:var(--sb-panel2); border-radius:10px; padding:3px; }
+  .sb-page-tab { border:none; background:transparent; color:var(--sb-faint); padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition: color .15s ease, background .2s ease; }
+  .sb-tab-active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; box-shadow: 0 6px 16px -6px rgba(99,102,241,.7); }
+  .sb-save-btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; border:none; padding:9px 22px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; box-shadow: 0 8px 20px -8px rgba(99,102,241,.6); transition: transform .15s ease, box-shadow .15s ease; }
+  .sb-save-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 24px -8px rgba(99,102,241,.75); }
+  .sb-save-btn:disabled { opacity:0.6; }
+  .sb-lang-active { background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; color:#fff !important; }
+
+  .sb-shell { display:flex; height: calc(100vh - 56px); height: calc(100dvh - 56px); }
+  .sb-sidebar { width: 340px; min-width:340px; background: rgba(18,18,26,.7); backdrop-filter: blur(14px); border-inline-end:1px solid var(--sb-border); overflow-y:auto; padding: 16px; }
+  .sb-preview-wrap { flex:1; background:#050507; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:14px; overflow:auto; }
+  .sb-device-toggle { display:flex; gap:6px; background:var(--sb-panel2); border-radius:10px; padding:4px; }
+  .sb-device-btn { border:none; background:transparent; color:var(--sb-faint); padding:8px 14px; border-radius:7px; font-size:16px; cursor:pointer; line-height:1; display:inline-flex; align-items:center; justify-content:center; transition: color .15s ease, background .2s ease; }
+  .sb-device-active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; }
+  .sb-preview-frame-outer { width:100%; max-width:480px; height:100%; max-height: 900px; background:#000; border-radius:20px; overflow:hidden; border:6px solid #1a1a25; box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(99,102,241,.15); transition: max-width .25s ease, border-radius .25s ease, border-width .25s ease; }
+  .sb-preview-frame-outer.sb-preview-desktop { max-width:100%; width:100%; height:100%; max-height:none; border-radius:8px; border-width:1px; }
+  #sbPreviewFrame { width:100%; height:100%; border:none; background:#fff; }
+
+  .sb-group-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color: var(--sb-faint); margin: 6px 4px; }
+
+  .sb-row { border:1px solid var(--sb-border); border-radius:12px; margin-bottom:8px; background: var(--sb-panel2); overflow:hidden; cursor:pointer; position:relative; transition: border-color .18s ease, transform .18s ease; }
+  .sb-row:hover { border-color: #3f3f5a; }
+  .sb-row-main { display:flex; align-items:center; gap:10px; padding:12px 12px; }
+  .sb-row-open { border-color: var(--sb-accent); box-shadow: 0 0 0 1px rgba(99,102,241,.25); }
+  .sb-row-icon { font-size:16px; }
+  .sb-row-label { flex:1; font-size:13.5px; font-weight:600; }
+  .sb-row-chevron { color:var(--sb-faint); font-size:16px; }
+  .sb-drag-handle { cursor: grab; color: var(--sb-faint); font-size:14px; }
+  .sb-row[draggable="true"]:hover { border-color: var(--sb-border-bright,#3f3f5a); }
+  .sb-row.sb-drag-over { border-color: var(--sb-accent); background: rgba(99,102,241,0.08); }
+  .sb-row-del { position:absolute; left:10px; top:12px; background:none; border:none; color: var(--sb-faint); cursor:pointer; font-size:13px; padding:2px 6px; }
+  [dir="rtl"] .sb-row-del { left:auto; right:10px; }
+  .sb-row-del:hover { color:#ef4444; }
+
+  .sb-fields { padding: 4px 14px 16px; border-top:1px solid var(--sb-border); }
+  .sb-field { margin: 12px 0; }
+  .sb-field-label { display:block; font-size:12px; font-weight:600; color: var(--sb-faint); margin-bottom:6px; }
+  .sb-field-label-sm { display:block; font-size:11px; color: var(--sb-faint); margin-bottom:4px; }
+  .sb-input { width:100%; background: var(--sb-bg); border:1px solid var(--sb-border); color: var(--sb-text); border-radius:8px; padding:8px 10px; font-size:13px; font-family:inherit; }
+  .sb-input:focus { outline:none; border-color: var(--sb-accent); }
+  .sb-color { width:100%; height:36px; border:1px solid var(--sb-border); border-radius:8px; background:var(--sb-bg); padding:2px; }
+  .sb-switch { position:relative; display:inline-block; width:40px; height:22px; }
+  .sb-switch input { opacity:0; width:0; height:0; }
+  .sb-switch span { position:absolute; inset:0; background:var(--sb-border); border-radius:22px; transition:.2s; }
+  .sb-switch span::before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+  .sb-switch input:checked + span { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  .sb-switch input:checked + span::before { transform: translateX(18px); }
+  [dir="rtl"] .sb-switch input:checked + span::before { transform: translateX(-18px); }
+
+  .sb-add-btn { width:100%; background: transparent; border:1.5px dashed var(--sb-border); color: var(--sb-faint); border-radius:12px; padding:11px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; margin-top:6px; transition: border-color .18s ease, color .18s ease, background .18s ease; }
+  .sb-add-btn:hover { border-color: var(--sb-accent); color: var(--sb-accent); background: rgba(99,102,241,.06); }
+  .sb-btn-secondary { background: var(--sb-bg); border:1px solid var(--sb-border); color: var(--sb-text); border-radius:8px; padding:7px 14px; font-size:12px; cursor:pointer; font-family:inherit; transition: border-color .18s ease, color .18s ease; }
+  .sb-btn-secondary:hover { border-color: var(--sb-accent); color: var(--sb-text); }
+
+  .sb-image-field { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .sb-image-preview { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--sb-border); }
+  .sb-image-empty { width:64px; height:64px; border-radius:8px; border:1px dashed var(--sb-border); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--sb-faint); text-align:center; }
+
+  .sb-list-field { display:flex; flex-direction:column; gap:10px; }
+  .sb-list-item { background: var(--sb-bg); border:1px solid var(--sb-border); border-radius:10px; padding:10px; }
+  .sb-list-item-head { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--sb-faint); margin-bottom:6px; }
+  .sb-list-item-head .sb-row-del { position:static; }
+
+  .sb-picker-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+  .sb-picker-item { display:flex; flex-direction:column; align-items:center; gap:6px; background: var(--sb-panel2); border:1px solid var(--sb-border); border-radius:12px; padding:16px 8px; cursor:pointer; color: var(--sb-text); font-size:12px; font-family:inherit; transition: border-color .18s ease, transform .18s ease; }
+  .sb-picker-item:hover { border-color: var(--sb-accent); transform: translateY(-2px); }
+
+  .sb-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; z-index:2000; }
+  .sb-modal-overlay.open { display:flex; }
+  .sb-modal { background: rgba(18,18,26,.92); backdrop-filter: blur(16px); border:1px solid var(--sb-border); border-radius:16px; width:100%; max-width:420px; max-height:80vh; overflow-y:auto; padding:20px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.6); }
+  .sb-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .sb-modal-header h3 { margin:0; font-size:15px; }
+  .sb-modal-close { background:none; border:none; color: var(--sb-faint); font-size:18px; cursor:pointer; }
+
+  .sb-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background: linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; padding:10px 22px; border-radius:30px; font-size:13px; font-weight:700; opacity:0; transition:.25s; z-index:3000; box-shadow: 0 12px 28px -10px rgba(99,102,241,.7); }
+  .sb-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width: 860px) {
+    .sb-shell { flex-direction: column; min-height: 0; }
+    .sb-sidebar { width:100%; min-width:0; flex: 0 0 55%; height:auto; min-height:0; border-inline-end:none; border-bottom:1px solid var(--sb-border); }
+    .sb-preview-wrap { flex: 1 1 45%; height:auto; min-height:0; padding:12px; }
+    .sb-preview-frame-outer { max-width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sb-topbar">
+  <div class="sb-topbar-left">
+    <a href="/static/dashboard.html" class="sb-back" title="Back" id="sbBackLink"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg></a>
+    <div class="sb-page-tabs" id="sbPageTabs">
+      <button class="sb-page-tab sb-tab-active" data-page="home" onclick="sbSwitchPage('home')" id="sbTabHome">Home</button>
+      <button class="sb-page-tab" data-page="products" onclick="sbSwitchPage('products')" id="sbTabProducts">All Products</button>
+      <button class="sb-page-tab" data-page="product" onclick="sbSwitchPage('product')" id="sbTabProduct">Product Page</button>
+      <button class="sb-page-tab" data-page="bundles" onclick="sbSwitchPage('bundles')" id="sbTabBundles">Bundles Page</button>
+    </div>
+    <button class="sb-btn-secondary" onclick="sbOpenCreateCustomPage()" style="margin-inline-start:8px;" id="sbNewPageBtn">+ New Page</button>
+    <button class="sb-btn-secondary" onclick="sbOpenStylePanel()" style="margin-inline-start:8px; display:inline-flex; align-items:center; gap:6px;" id="sbStyleBtn"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3m4 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M5.5 7a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m.5 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/><path d="M16 8c0 3.15-1.866 2.585-3.567 2.07C11.42 9.763 10.465 9.473 10 10c-.603.683-.475 1.819-.351 2.92C9.826 14.495 9.996 16 8 16a8 8 0 1 1 8-8m-8 7c.611 0 .654-.171.655-.176.078-.146.124-.464.07-1.119-.014-.168-.037-.37-.061-.591-.052-.464-.112-1.005-.118-1.462-.01-.707.083-1.61.704-2.314.369-.417.845-.578 1.272-.618.404-.038.812.026 1.16.104.343.077.702.186 1.025.284l.028.008c.346.105.658.199.953.266.653.148.904.083.991.024C14.717 9.38 15 9.161 15 8a7 7 0 1 0-7 7"/></svg><span id="sbStyleBtnText">Style</span></button>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div class="sb-lang-switcher" style="display:flex; gap:3px; background:var(--sb-panel2); border-radius:8px; padding:3px;">
+      <button class="sb-lang-btn sb-lang-active" data-lang="en" onclick="sbSetLang('en')" style="border:none; background:transparent; color:#8b8ba3; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit;">EN</button>
+      <button class="sb-lang-btn" data-lang="fr" onclick="sbSetLang('fr')" style="border:none; background:transparent; color:#8b8ba3; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit;">FR</button>
+      <button class="sb-lang-btn" data-lang="ar" onclick="sbSetLang('ar')" style="border:none; background:transparent; color:#8b8ba3; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit;">AR</button>
+    </div>
+    <button class="sb-btn-secondary" id="sbDeletePageBtn" style="display:none; color:#ef4444; border-color:#ef4444;" onclick="sbDeleteCurrentCustomPage()">Delete Page</button>
+    <button class="sb-save-btn" id="sbSaveBtn" onclick="sbSavePage()">Save</button>
+  </div>
+</div>
+
+<div class="sb-shell">
+  <aside class="sb-sidebar" id="sbSidebarContent">
+    <div style="text-align:center; padding:40px 0; color:var(--sb-faint); font-size:13px;" id="sbLoadingText">Loading...</div>
+  </aside>
+  <div class="sb-preview-wrap">
+    <div class="sb-device-toggle">
+      <button type="button" class="sb-device-btn sb-device-active" data-device="mobile" onclick="sbSetPreviewDevice('mobile')" title="Mobile"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/><path d="M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/></svg></button>
+      <button type="button" class="sb-device-btn" data-device="desktop" onclick="sbSetPreviewDevice('desktop')" title="Desktop"><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M13.5 3a.5.5 0 0 1 .5.5V11H2V3.5a.5.5 0 0 1 .5-.5zm-11-1A1.5 1.5 0 0 0 1 3.5V12h14V3.5A1.5 1.5 0 0 0 13.5 2zM0 12.5h16a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5"/></svg></button>
+    </div>
+    <div class="sb-preview-frame-outer" id="sbPreviewFrameOuter">
+      <iframe id="sbPreviewFrame"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="sb-modal-overlay" id="sbModalOverlay" onclick="if(event.target===this) sbCloseModal()">
+  <div class="sb-modal">
+    <div class="sb-modal-header">
+      <h3 id="sbModalTitle"></h3>
+      <button class="sb-modal-close" onclick="sbCloseModal()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+    </div>
+    <div id="sbModalBody"></div>
+  </div>
+</div>
+
+<div class="sb-toast" id="sbToast"></div>
+
+<script src="/static/js/store-builder.js"></script>
+</body>
+</html>

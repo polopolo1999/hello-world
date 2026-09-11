@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Codes — Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { dark: { bg: '#0f172a', card: '#1e293b', border: '#334155' } } } }
+        }
+    </script>
+<style>
+
+  /* Ambient background mesh */
+  body { position: relative; }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 12% -8%, rgba(99,102,241,.16), transparent 42%),
+      radial-gradient(circle at 88% 8%, rgba(139,92,246,.13), transparent 40%),
+      radial-gradient(circle at 50% 105%, rgba(16,185,129,.07), transparent 45%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(148,163,184,.10) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+    mask-image: radial-gradient(circle at 50% 0%, #000, transparent 70%);
+  }
+  ::selection { background: rgba(99,102,241,.35); color: #fff; }
+  *:focus-visible { outline: 2px solid rgba(99,102,241,.7); outline-offset: 2px; border-radius: 10px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border: 3px solid transparent; background-clip: content-box; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; background-clip: content-box; }
+  /* Glass-ring panels: gradient hairline border without touching layout */
+  .panel { position: relative; isolation: isolate; }
+  .panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: linear-gradient(140deg, rgba(129,140,248,.4), rgba(255,255,255,.04) 32%, rgba(167,139,250,.22) 68%, rgba(255,255,255,.03));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none; opacity: .55;
+  }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <header class="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full border-b border-slate-900">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-600/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <span class="text-xl font-black tracking-wider bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">OXYDE <span class="text-indigo-400 font-medium text-sm">/ Admin</span></span>
+        </div>
+        <button id="lockBtn" class="hidden text-xs text-slate-400 hover:text-slate-200 transition">قفل الجلسة</button>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full px-4 py-10">
+
+        <!-- Admin key gate -->
+        <div id="gate" class="bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-8 max-w-md mx-auto">
+            <div class="text-center mb-6">
+                <div class="text-xs font-semibold text-indigo-400 tracking-wider uppercase mb-2">وصول محمي</div>
+                <h1 class="text-xl font-bold text-white mb-1">مفتاح الأدمن</h1>
+                <p class="text-sm text-slate-400">أدخل X-Admin-Key للمتابعة</p>
+            </div>
+            <div id="gateErr" class="hidden mb-4 p-3 rounded-2xl bg-red-950/50 border border-red-500/30 text-red-300 text-sm"></div>
+            <input type="password" id="adminKeyInput" placeholder="ADMIN_API_KEY"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm mb-4">
+            <button id="unlockBtn" class="w-full bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 text-white font-medium py-3 rounded-xl transition text-sm">دخول</button>
+        </div>
+
+        <!-- Admin panel -->
+        <div id="panel" class="hidden space-y-8">
+
+            <!-- Create code form -->
+            <div class="bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-6">
+                <h2 class="text-lg font-bold text-white mb-4">إنشاء كود جديد</h2>
+                <div id="createErr" class="hidden mb-4 p-3 rounded-2xl bg-red-950/50 border border-red-500/30 text-red-300 text-sm"></div>
+                <div id="createOk" class="hidden mb-4 p-3 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 text-emerald-300 text-sm"></div>
+                <form id="createForm" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-2">الكود (اختياري — يتولد تلقائياً)</label>
+                        <input type="text" id="codeInput" placeholder="مثال: GOLD-2026"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-2">الخطة</label>
+                        <select id="planInput" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-indigo-500">
+                            <option value="free">Free</option>
+                            <option value="gold" selected>Gold</option>
+                            <option value="diamond">Diamond</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-2">المدة (أيام)</label>
+                        <input type="number" id="daysInput" value="30" min="1"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="sm:col-span-4">
+                        <button type="submit" id="createBtn" class="w-full sm:w-auto bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 text-white font-medium px-6 py-2.5 rounded-xl transition text-sm">
+                            إنشاء الكود
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Codes list -->
+            <div class="bg-slate-900/70 backdrop-blur-xl border border-slate-800/60 rounded-3xl panel p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-white">الأكواد</h2>
+                    <button id="refreshBtn" class="text-xs text-indigo-400 hover:text-indigo-300 transition">تحديث</button>
+                </div>
+                <div id="listErr" class="hidden mb-4 p-3 rounded-2xl bg-red-950/50 border border-red-500/30 text-red-300 text-sm"></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-right">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-800">
+                                <th class="py-2 pr-3 font-medium">الكود</th>
+                                <th class="py-2 pr-3 font-medium">الخطة</th>
+                                <th class="py-2 pr-3 font-medium">المدة</th>
+                                <th class="py-2 pr-3 font-medium">الحالة</th>
+                                <th class="py-2 pr-3 font-medium">أُنشئ</th>
+                                <th class="py-2 pr-3 font-medium"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="codesBody" class="divide-y divide-slate-800/70"></tbody>
+                    </table>
+                </div>
+                <p id="emptyMsg" class="hidden text-center text-slate-500 text-sm py-8">ماكاين حتى كود بعد</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+    const STORAGE_KEY = 'oxyde_admin_key';
+
+    const gate = document.getElementById('gate');
+    const panel = document.getElementById('panel');
+    const lockBtn = document.getElementById('lockBtn');
+    const gateErr = document.getElementById('gateErr');
+
+    function adminKey() { return sessionStorage.getItem(STORAGE_KEY); }
+
+    async function adminFetch(path, options = {}) {
+        const headers = Object.assign({}, options.headers || {}, { 'X-Admin-Key': adminKey() || '' });
+        if (options.body) headers['Content-Type'] = 'application/json';
+        const res = await fetch(path, Object.assign({}, options, { headers }));
+        let data = null;
+        try { data = await res.json(); } catch (e) {}
+        if (!res.ok) {
+            const message = (data && data.detail) ? (typeof data.detail === 'string' ? data.detail : 'خطأ في الطلب') : `خطأ (${res.status})`;
+            throw new Error(message);
+        }
+        return data;
+    }
+
+    function showPanel() {
+        gate.classList.add('hidden');
+        panel.classList.remove('hidden');
+        lockBtn.classList.remove('hidden');
+        loadCodes();
+    }
+
+    async function tryUnlock(key) {
+        sessionStorage.setItem(STORAGE_KEY, key);
+        try {
+            await adminFetch('/admin/redeem-codes');
+            showPanel();
+        } catch (e) {
+            sessionStorage.removeItem(STORAGE_KEY);
+            gateErr.textContent = 'مفتاح غير صحيح';
+            gateErr.classList.remove('hidden');
+        }
+    }
+
+    document.getElementById('unlockBtn').addEventListener('click', () => {
+        const key = document.getElementById('adminKeyInput').value.trim();
+        if (!key) return;
+        gateErr.classList.add('hidden');
+        tryUnlock(key);
+    });
+
+    lockBtn.addEventListener('click', () => {
+        sessionStorage.removeItem(STORAGE_KEY);
+        panel.classList.add('hidden');
+        lockBtn.classList.add('hidden');
+        gate.classList.remove('hidden');
+        document.getElementById('adminKeyInput').value = '';
+    });
+
+    // إذا المفتاح محفوظ من قبل فهاذي الجلسة، ندوزو مباشرة
+    if (adminKey()) tryUnlock(adminKey());
+
+    const PLAN_LABELS = { free: 'Free', gold: 'Gold', diamond: 'Diamond' };
+
+    async function loadCodes() {
+        const listErr = document.getElementById('listErr');
+        const body = document.getElementById('codesBody');
+        const emptyMsg = document.getElementById('emptyMsg');
+        listErr.classList.add('hidden');
+        try {
+            const codes = await adminFetch('/admin/redeem-codes');
+            body.innerHTML = '';
+            emptyMsg.classList.toggle('hidden', codes.length > 0);
+            for (const c of codes) {
+                const tr = document.createElement('tr');
+                tr.className = 'text-slate-200';
+                const created = new Date(c.created_at).toLocaleDateString('ar-DZ');
+                const statusHtml = c.is_used
+                    ? `<span class="text-xs px-2 py-1 rounded-lg bg-slate-800 text-slate-400">مستخدم${c.used_by_store_id ? ' — متجر #' + c.used_by_store_id : ''}</span>`
+                    : `<span class="text-xs px-2 py-1 rounded-lg bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">متاح</span>`;
+                const deleteBtn = c.is_used
+                    ? ''
+                    : `<button data-id="${c.id}" class="del-btn text-xs text-red-400 hover:text-red-300 transition">حذف</button>`;
+                tr.innerHTML = `
+                    <td class="py-3 pr-3 font-mono text-xs">${c.code}</td>
+                    <td class="py-3 pr-3">${PLAN_LABELS[c.plan] || c.plan}</td>
+                    <td class="py-3 pr-3">${c.duration_days} يوم</td>
+                    <td class="py-3 pr-3">${statusHtml}</td>
+                    <td class="py-3 pr-3 text-slate-500 text-xs">${created}</td>
+                    <td class="py-3 pr-3">${deleteBtn}</td>
+                `;
+                body.appendChild(tr);
+            }
+            document.querySelectorAll('.del-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('حذف هذا الكود؟')) return;
+                    try {
+                        await adminFetch(`/admin/redeem-codes/${btn.dataset.id}`, { method: 'DELETE' });
+                        loadCodes();
+                    } catch (e) {
+                        listErr.textContent = e.message;
+                        listErr.classList.remove('hidden');
+                    }
+                });
+            });
+        } catch (e) {
+            listErr.textContent = e.message;
+            listErr.classList.remove('hidden');
+        }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', loadCodes);
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const createErr = document.getElementById('createErr');
+        const createOk = document.getElementById('createOk');
+        createErr.classList.add('hidden');
+        createOk.classList.add('hidden');
+
+        const code = document.getElementById('codeInput').value.trim() || null;
+        const plan = document.getElementById('planInput').value;
+        const duration_days = parseInt(document.getElementById('daysInput').value, 10);
+
+        const btn = document.getElementById('createBtn');
+        btn.disabled = true;
+        btn.textContent = 'جارٍ الإنشاء...';
+        try {
+            const result = await adminFetch('/admin/redeem-codes', {
+                method: 'POST',
+                body: JSON.stringify({ code, plan, duration_days }),
+            });
+            createOk.textContent = `تم إنشاء الكود: ${result.code}`;
+            createOk.classList.remove('hidden');
+            document.getElementById('codeInput').value = '';
+            loadCodes();
+        } catch (e) {
+            createErr.textContent = e.message;
+            createErr.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'إنشاء الكود';
+        }
+    });
+    </script>
+</body>
+</html>
