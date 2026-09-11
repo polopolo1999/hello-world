@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="{{ product.name }} — {{ store.name }}">
+<meta property="og:description" content="{{ product.description or 'Order Now!' }}">
+<meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.hostname }}{{ product.image_url or '' }}">
+<meta property="og:type" content="product">
+<title>{{ product.name }} — {{ store.name }}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+
+{{ custom_style_css|safe }}
+
+{% if store.meta_pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '{{ store.meta_pixel_id }}');
+fbq('track', 'PageView');
+</script>
+{% endif %}
+
+{% if store.tiktok_pixel_id %}
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<e.methods.length;n++)ttq.setAndDefer(e,e.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+  ttq.load('{{ store.tiktok_pixel_id }}');
+  ttq.page();
+}(window, document, 'ttq');
+</script>
+{% endif %}
+
+{% if store.google_tag_manager_id %}
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','{{ store.google_tag_manager_id }}');</script>
+{% endif %}
+
+</head>
+<body class="{{ store.template }}">
+{% if store.google_tag_manager_id %}
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ store.google_tag_manager_id }}"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+{% endif %}
+<style>
+  .hamburger-btn { background: none; border: none; color: inherit; cursor: pointer; padding: 6px; display: flex; align-items: center; }
+  .nav-menu-drawer { position: fixed; top: 0; left: -320px; width: 100%; max-width: 300px; height: 100%; background: var(--bg-plate-glass, rgba(26,26,37,.85)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border, #333); box-shadow: 5px 0 25px rgba(0,0,0,0.5); z-index: 1200; transition: left 0.35s cubic-bezier(.22,1,.36,1); padding: 20px; box-sizing: border-box; color: var(--text, #fff); }
+  [dir="rtl"] .nav-menu-drawer { left: auto; right: -320px; border-right: none; border-left: 1px solid var(--border, #333); transition: right 0.3s ease; }
+  .nav-menu-drawer.open { left: 0; }
+  [dir="rtl"] .nav-menu-drawer.open { right: 0; }
+  .nav-menu-header { display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border, #333); padding-bottom: 15px; margin-bottom: 10px; }
+  .nav-menu-close { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; }
+  .nav-menu-links { list-style: none; margin: 0; padding: 0; }
+  .nav-menu-links li a { display: block; padding: 14px 12px; color: inherit; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.15s ease, color 0.15s ease; }
+  .nav-menu-links li a:hover { background: var(--bg-plate, #1a1a1a); color: var(--accent-light, #818cf8); }
+  .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; display: none; }
+  .cart-overlay.open { display: block; }
+</style>
+{{ sb_css|safe }}
+<header class="site-nav">
+  <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+  </button>
+  <a href="/" class="brand" style="text-decoration:none;">
+    <span class="brand-mark"></span>
+    <span style="font-family:'Cairo',sans-serif; font-weight:900;">{{ store.name }}</span>
+  </a>
+  <div class="nav-right">
+    <div class="lang-switcher-inline">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" data-lang="ar" onclick="setLang('ar')">AR</button>
+    </div>
+  </div>
+</header>
+
+<div class="nav-menu-drawer" id="navMenuDrawer">
+  <div class="nav-menu-header">
+    <strong>Menu</strong>
+    <button class="nav-menu-close" onclick="toggleNavMenu()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+  </div>
+  <ul class="nav-menu-links">
+    {% for link in nav_links %}
+    <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+<div class="cart-overlay" id="navMenuOverlay" onclick="toggleNavMenu()"></div>
+<script>
+function toggleNavMenu() {
+  document.getElementById('navMenuDrawer').classList.toggle('open');
+  document.getElementById('navMenuOverlay').classList.toggle('open');
+}
+</script>
+    </div>
+  </div>
+</header>
+
+<div class="product-hero">
+
+  <div class="product-media">
+    <div class="product-image {{ 'no-img' if not product.image_url else '' }}" id="mainImageWrap">
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.name }}" id="mainProductImage">
+      {% else %}
+        <span data-i18n="noImage">No Image</span>
+      {% endif %}
+    </div>
+
+    {% set gallery_extra = product.images | rejectattr('image_url', 'equalto', product.image_url) | list %}
+    {% if product.image_url and gallery_extra %}
+    <div class="gallery-thumbs">
+      <button type="button" class="gallery-thumb active" onclick="switchMainImage('{{ product.image_url }}', this)">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+      </button>
+      {% for img in gallery_extra %}
+      <button type="button" class="gallery-thumb" onclick="switchMainImage('{{ img.image_url }}', this)">
+        <img src="{{ img.image_url }}" alt="{{ product.name }}">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <h1 class="product-name">{{ product.name }}</h1>
+  {% if product.description %}<div class="product-desc">{{ product.description }}</div>{% endif %}
+
+  <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+    <div class="product-price" id="productPrice">
+      {{ "%.2f"|format(product.price_cents / 100) }} {{ product.currency }}
+    </div>
+    {% if product.compare_at_price_cents and product.compare_at_price_cents > product.price_cents %}
+    <div class="product-price-compare" id="productComparePrice">
+      {{ "%.2f"|format(product.compare_at_price_cents / 100) }} {{ product.currency }}
+    </div>
+    <span class="badge badge-sale">-{{ ((1 - (product.price_cents / product.compare_at_price_cents)) * 100) | round | int }}%</span>
+    {% endif %}
+  </div>
+  <div class="product-delivery" id="deliveryText">
+    + <span id="deliveryPriceDisplay">{{ "%.2f"|format(store.default_delivery_price / 100) }}</span> {{ product.currency }}
+    <span data-i18n="deliveryFee">Delivery fee</span>
+  </div>
+
+  {% if product.show_urgency and product.quantity <= 10 %}
+  <div class="badge-row">
+    <span class="badge badge-urgency"><span data-i18n="onlyLeft">Only</span> {{ product.quantity }} <span data-i18n="leftInStock">left in stock!</span></span>
+  </div>
+  {% endif %}
+
+  {% if product.countdown_enabled and product.countdown_ends_at %}
+  <div class="badge-row">
+    <span class="badge badge-countdown" id="countdownBanner"><span data-i18n="offerEndsIn">Offer ends in</span> <span id="countdownTimer">--:--:--</span></span>
+  </div>
+  {% endif %}
+
+  {% if product.variants and product.variants|length > 0 %}
+  <div class="field variant-select-wrap" style="margin-top:14px;">
+    <label for="variantSelect" data-i18n="chooseOption">Choose an option</label>
+    <select id="variantSelect" onchange="onVariantChange()">
+      <option value="">{{ product.name }} ({{ "%.2f"|format(product.price_cents/100) }} {{ product.currency }})</option>
+      {% for v in product.variants %}
+        {% if v.is_active %}
+        <option value="{{ v.id }}" data-price="{{ v.price_cents if v.price_cents is not none else product.price_cents }}" data-qty="{{ v.quantity }}">{{ v.name }} ({{ "%.2f"|format((v.price_cents if v.price_cents is not none else product.price_cents)/100) }} {{ product.currency }}){% if v.quantity == 0 %} — Out of stock{% endif %}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <div class="order-section">
+    <div class="eyebrow">ORDER NOW</div>
+    <div class="alert alert-error" id="orderErr"></div>
+    <div class="alert alert-success" id="orderSuccess" style="display:none;"></div>
+
+    <form id="orderForm">
+      <div class="field">
+        <label for="orderFirstName" data-i18n="firstName">First Name</label>
+        <input type="text" id="orderFirstName" required>
+      </div>
+      <div class="field">
+        <label for="orderLastName" data-i18n="lastName">Last Name</label>
+        <input type="text" id="orderLastName" required>
+      </div>
+      <div class="field">
+        <label for="orderProvince" data-i18n="province">Province</label>
+        <select id="orderProvince" class="province-select" required onchange="updateDeliveryPrice()">
+          <option value="" data-i18n="selectProvince">Select province</option>
+          {% for code, name in provinces_en.items() %}
+          <option value="{{ code }}">{{ code }} — {{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field" id="deliveryTypeWrap" style="display:none;">
+        <label data-i18n="deliveryTypeLabel">Delivery Type</label>
+        <div style="display:flex; gap:14px; margin-top:4px;">
+          <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+            <input type="radio" name="deliveryType" value="home" checked onchange="updateDeliveryPrice()">
+            <span data-i18n="deliveryHome">Home Delivery</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+            <input type="radio" name="deliveryType" value="stop_desk" onchange="updateDeliveryPrice()">
+            <span data-i18n="deliveryStopDesk">Stop-Desk</span>
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="orderPhone" data-i18n="phone">Phone</label>
+        <input type="tel" id="orderPhone" required placeholder="05XXXXXXXX">
+      </div>
+      <div class="field">
+        <label for="orderQuantity" data-i18n="quantity">Quantity</label>
+        <input type="number" id="orderQuantity" required min="1" value="1" max="{{ product.quantity }}">
+      </div>
+
+      {% for f in custom_fields %}
+      <div class="field">
+        <label for="customField_{{ loop.index }}">{{ f.label }}{% if f.required %} *{% endif %}</label>
+        <input type="text" id="customField_{{ loop.index }}" data-label="{{ f.label }}" {% if f.required %}required{% endif %}>
+      </div>
+      {% endfor %}
+
+      <div class="field">
+        <label for="couponInput" data-i18n="haveCoupon">Have a coupon code?</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="couponInput" style="flex:1; text-transform:uppercase;" placeholder="WELCOME10">
+          <button type="button" onclick="applyCoupon()" style="white-space:nowrap; padding:0 16px; background:var(--bg-plate-raised); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); cursor:pointer; font-size:14px;" data-i18n="apply">Apply</button>
+        </div>
+        <div id="couponMsg" style="font-size:12px; margin-top:6px; display:none;"></div>
+      </div>
+
+      <div class="total-row">
+        <span class="total-label" data-i18n="total">Total</span>
+        <span class="total-value" id="totalPrice">
+          {{ "%.2f"|format((product.price_cents + store.default_delivery_price) / 100) }} {{ product.currency }}
+        </span>
+      </div>
+
+      <button type="submit" class="btn" id="orderSubmitBtn" data-i18n="orderNow">Order Now</button>
+    </form>
+  </div>
+
+  <div class="trust-bar" style="border-bottom:none; padding-top:24px;">
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> <span data-i18n="trustSecure">Secure Checkout</span></span>
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg> <span data-i18n="trustDelivery">Fast Delivery</span></span>
+    <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle></svg> <span data-i18n="trustCod">Cash on Delivery</span></span>
+  </div>
+
+  {% if not is_diamond %}
+  <div style="text-align:center; padding:30px 0 10px; color:var(--text-faint); font-size:11px; font-family:'IBM Plex Mono',monospace;" dir="ltr">
+    powered by Oxyde
+  </div>
+  {% endif %}
+</div>
+
+{% if builder_product_html %}
+{{ builder_product_html|safe }}
+{% endif %}
+
+<div class="sticky-order-bar" id="stickyOrderBar">
+  <span class="sob-price" id="stickyPrice"></span>
+  <button type="button" class="btn" onclick="document.getElementById('orderFirstName').scrollIntoView({behavior:'smooth', block:'center'}); document.getElementById('orderFirstName').focus();" data-i18n="orderNow">Order Now</button>
+</div>
+
+<script>
+const STORE_ID = {{ store.id }};
+const PRODUCT_ID = {{ product.id }};
+const PRICE_CENTS = {{ product.price_cents }};
+const CURRENCY = "{{ product.currency }}";
+const DELIVERY_PRICES = {{ delivery_prices | tojson }};
+const STOP_DESK_PRICES = {{ stop_desk_prices | tojson }};
+const DEFAULT_DELIVERY = {{ store.default_delivery_price }};
+const HAS_META_PIXEL = {{ 'true' if store.meta_pixel_id else 'false' }};
+const HAS_TIKTOK_PIXEL = {{ 'true' if store.tiktok_pixel_id else 'false' }};
+const COUNTDOWN_ENDS_AT = {{ (product.countdown_ends_at.isoformat() + 'Z') | tojson if product.countdown_enabled and product.countdown_ends_at else 'null' }};
+const THANK_YOU_MESSAGE = {{ (store.thank_you_message or '') | tojson }};
+
+function switchMainImage(url, btn) {
+  const img = document.getElementById('mainProductImage');
+  if (img) img.src = url;
+  document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+let selectedVariantPrice = PRICE_CENTS;
+let selectedVariantMaxQty = {{ product.quantity }};
+let selectedVariantId = null;
+
+function onVariantChange() {
+  const sel = document.getElementById('variantSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (sel.value === '') {
+    selectedVariantPrice = PRICE_CENTS;
+    selectedVariantMaxQty = {{ product.quantity }};
+    selectedVariantId = null;
+  } else {
+    selectedVariantPrice = parseInt(opt.dataset.price, 10);
+    selectedVariantMaxQty = parseInt(opt.dataset.qty, 10);
+    selectedVariantId = parseInt(sel.value, 10);
+  }
+  const qtyInput = document.getElementById('orderQuantity');
+  qtyInput.max = selectedVariantMaxQty;
+  if (parseInt(qtyInput.value, 10) > selectedVariantMaxQty) qtyInput.value = Math.max(1, selectedVariantMaxQty);
+  document.getElementById('productPrice').textContent = (selectedVariantPrice / 100).toFixed(2) + ' ' + CURRENCY;
+  updateTotal();
+}
+
+if (COUNTDOWN_ENDS_AT) {
+  const endTime = new Date(COUNTDOWN_ENDS_AT).getTime();
+  const timerEl = document.getElementById('countdownTimer');
+  const bannerEl = document.getElementById('countdownBanner');
+  function tickCountdown() {
+    const diff = endTime - Date.now();
+    if (diff <= 0) {
+      if (bannerEl) bannerEl.style.display = 'none';
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (timerEl) timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    setTimeout(tickCountdown, 1000);
+  }
+  tickCountdown();
+}
+
+const CURRENCY_ISO = { "DA": "DZD", "$": "USD", "£": "GBP" };
+function isoCurrency() {
+  return CURRENCY_ISO[CURRENCY] || "USD";
+}
+
+const translations = {
+  en: {
+    deliveryFee: "Delivery fee", firstName: "First Name", lastName: "Last Name",
+    province: "Province", selectProvince: "Select province", phone: "Phone",
+    quantity: "Quantity", total: "Total", orderNow: "Order Now", noImage: "No Image",
+    success: "Your order has been sent successfully! We will contact you soon.",
+    error: "Error: ",
+    onlyLeft: "Only", leftInStock: "left in stock!", offerEndsIn: "Offer ends in", chooseOption: "Choose an option",
+    trustSecure: "Secure Checkout", trustDelivery: "Fast Delivery", trustCod: "Cash on Delivery",
+    haveCoupon: "Have a coupon code?", apply: "Apply", couponApplied: "Coupon applied",
+    deliveryTypeLabel: "Delivery Type", deliveryHome: "Home Delivery", deliveryStopDesk: "Stop-Desk"
+  },
+  fr: {
+    deliveryFee: "Frais de livraison", firstName: "Prénom", lastName: "Nom",
+    province: "Wilaya", selectProvince: "Choisir la wilaya", phone: "Téléphone",
+    quantity: "Quantité", total: "Total", orderNow: "Commander maintenant", noImage: "Pas d'image",
+    success: "Votre commande a été envoyée avec succès ! Nous vous contacterons bientôt.",
+    error: "Erreur: ",
+    onlyLeft: "Plus que", leftInStock: "en stock !", offerEndsIn: "L'offre se termine dans", chooseOption: "Choisir une option",
+    trustSecure: "Paiement Sécurisé", trustDelivery: "Livraison Rapide", trustCod: "Paiement à la Livraison",
+    haveCoupon: "Vous avez un code promo ?", apply: "Appliquer", couponApplied: "Code appliqué",
+    deliveryTypeLabel: "Type de livraison", deliveryHome: "Livraison à domicile", deliveryStopDesk: "Stop-Desk"
+  },
+  ar: {
+    deliveryFee: "سعر التوصيل", firstName: "الاسم", lastName: "اللقب",
+    province: "الولاية", selectProvince: "اختر الولاية", phone: "رقم الهاتف",
+    quantity: "الكمية", total: "الإجمالي", orderNow: "اطلب الآن", noImage: "لا توجد صورة",
+    success: "تم إرسال طلبك بنجاح! سنتواصل معك قريبًا.",
+    error: "حدث خطأ: ",
+    onlyLeft: "باقي", leftInStock: "فقط فـ المخزون!", offerEndsIn: "العرض كيسالي فـ", chooseOption: "اختر خيار",
+    trustSecure: "دفع آمن", trustDelivery: "توصيل سريع", trustCod: "الدفع عند الاستلام",
+    haveCoupon: "عندك كود خصم؟", apply: "طبّق", couponApplied: "تطبق الكود",
+    deliveryTypeLabel: "نوع التوصيل", deliveryHome: "توصيل للمنزل", deliveryStopDesk: "توصيل للمكتب (Stop-Desk)"
+  }
+};
+
+const provinceNames = {
+  en: {{ provinces_en | tojson }},
+  fr: {{ provinces_fr | tojson }},
+  ar: {{ provinces_ar | tojson }}
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (translations[lang][key]) {
+      if (el.tagName === 'OPTION' && el.value !== '') {
+        const code = el.value;
+        el.textContent = code + ' — ' + provinceNames[lang][code];
+      } else {
+        el.textContent = translations[lang][key];
+      }
+    }
+  });
+  if (lang === 'ar') { document.documentElement.dir = 'rtl'; document.documentElement.lang = 'ar'; }
+  else { document.documentElement.dir = 'ltr'; document.documentElement.lang = lang; }
+  updateTotal();
+}
+
+function formatPrice(cents) {
+  return (cents / 100).toFixed(2) + ' ' + CURRENCY;
+}
+
+function getSelectedDeliveryType() {
+  const checked = document.querySelector('input[name="deliveryType"]:checked');
+  return checked ? checked.value : 'home';
+}
+
+function getDeliveryPrice() {
+  const province = document.getElementById('orderProvince').value;
+  if (!province) return DEFAULT_DELIVERY;
+  const type = getSelectedDeliveryType();
+  if (type === 'stop_desk' && STOP_DESK_PRICES[province] != null) {
+    return STOP_DESK_PRICES[province];
+  }
+  return DELIVERY_PRICES[province] || DEFAULT_DELIVERY;
+}
+
+function updateDeliveryPrice() {
+  const province = document.getElementById('orderProvince').value;
+  const wrap = document.getElementById('deliveryTypeWrap');
+  const hasStopDesk = province && STOP_DESK_PRICES[province] != null;
+  wrap.style.display = hasStopDesk ? 'block' : 'none';
+  if (!hasStopDesk) {
+    const homeRadio = document.querySelector('input[name="deliveryType"][value="home"]');
+    if (homeRadio) homeRadio.checked = true;
+  }
+  const delivery = getDeliveryPrice();
+  document.getElementById('deliveryPriceDisplay').textContent = (delivery / 100).toFixed(2);
+  updateTotal();
+}
+
+let appliedDiscountCents = 0;
+let appliedCouponCode = null;
+
+function updateTotal() {
+  const qty = parseInt(document.getElementById('orderQuantity').value) || 1;
+  const delivery = getDeliveryPrice();
+  const total = Math.max(0, (selectedVariantPrice * qty) + delivery - appliedDiscountCents);
+  const formatted = formatPrice(total);
+  document.getElementById('totalPrice').textContent = formatted;
+  const stickyPriceEl = document.getElementById('stickyPrice');
+  if (stickyPriceEl) stickyPriceEl.textContent = formatted;
+}
+
+async function applyCoupon() {
+  const input = document.getElementById('couponInput');
+  const msg = document.getElementById('couponMsg');
+  const code = input.value.trim();
+  if (!code) return;
+
+  const qty = parseInt(document.getElementById('orderQuantity').value) || 1;
+  const subtotal = selectedVariantPrice * qty;
+
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/discount-codes/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, subtotal_cents: subtotal }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Invalid code');
+
+    appliedDiscountCents = data.discount_amount_cents;
+    appliedCouponCode = code;
+    msg.style.display = 'block';
+    msg.style.color = 'var(--success, #22c55e)';
+    msg.textContent = `✓ ${translations[currentLang].couponApplied || 'Coupon applied'} (-${formatPrice(appliedDiscountCents)})`;
+    updateTotal();
+  } catch (err) {
+    appliedDiscountCents = 0;
+    appliedCouponCode = null;
+    msg.style.display = 'block';
+    msg.style.color = 'var(--danger)';
+    msg.textContent = err.message;
+    updateTotal();
+  }
+}
+
+// إظهار الشريط اللاصق (موبايل) بعد ما الزائر يعدي زر الطلب الأساسي بالتمرير
+(function () {
+  const bar = document.getElementById('stickyOrderBar');
+  const trigger = document.getElementById('orderSubmitBtn');
+  if (!bar || !trigger) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      bar.classList.toggle('show', !entry.isIntersecting);
+    });
+  }, { threshold: 0 });
+  observer.observe(trigger);
+})();
+
+document.getElementById('orderQuantity').addEventListener('input', updateTotal);
+
+const orderForm = document.getElementById('orderForm');
+const orderErr = document.getElementById('orderErr');
+const orderSuccess = document.getElementById('orderSuccess');
+
+function hideAlert(el) { el.style.display = 'none'; }
+function showAlert(el, message) { el.textContent = message; el.style.display = 'block'; }
+
+function formatError(detail) {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(d => d.msg).join(', ');
+  return 'An unexpected error occurred';
+}
+
+if (HAS_META_PIXEL) {
+  fbq('track', 'ViewContent', {
+    content_ids: [String(PRODUCT_ID)],
+    content_type: 'product',
+    content_name: {{ product.name | tojson }},
+    value: PRICE_CENTS / 100,
+    currency: isoCurrency(),
+  });
+}
+if (HAS_TIKTOK_PIXEL) {
+  ttq.track('ViewContent', {
+    content_id: String(PRODUCT_ID),
+    content_type: 'product',
+    content_name: {{ product.name | tojson }},
+    value: PRICE_CENTS / 100,
+    currency: isoCurrency(),
+  });
+}
+
+let checkoutStarted = false;
+function trackInitiateCheckoutOnce() {
+  if (checkoutStarted) return;
+  checkoutStarted = true;
+  if (HAS_META_PIXEL) {
+    fbq('track', 'InitiateCheckout', {
+      content_ids: [String(PRODUCT_ID)],
+      content_type: 'product',
+      value: PRICE_CENTS / 100,
+      currency: isoCurrency(),
+    });
+  }
+  if (HAS_TIKTOK_PIXEL) {
+    ttq.track('InitiateCheckout', {
+      content_id: String(PRODUCT_ID),
+      content_type: 'product',
+      value: PRICE_CENTS / 100,
+      currency: isoCurrency(),
+    });
+  }
+}
+orderForm.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('focus', trackInitiateCheckoutOnce, { once: true });
+});
+
+orderForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert(orderErr);
+  hideAlert(orderSuccess);
+  const btn = document.getElementById('orderSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = translations[currentLang].orderNow + '...';
+
+  const qty = parseInt(document.getElementById('orderQuantity').value, 10);
+  const delivery = getDeliveryPrice();
+  const totalUnits = ((selectedVariantPrice * qty) + delivery) / 100;
+
+  const customFieldsData = {};
+  document.querySelectorAll('[id^="customField_"]').forEach(el => {
+    if (el.value.trim()) customFieldsData[el.dataset.label] = el.value.trim();
+  });
+
+  const payload = {
+    customer_first_name: document.getElementById('orderFirstName').value.trim(),
+    customer_last_name: document.getElementById('orderLastName').value.trim(),
+    province: document.getElementById('orderProvince').value,
+    phone: document.getElementById('orderPhone').value.trim(),
+    items: [
+      {
+        product_id: PRODUCT_ID,
+        variant_id: selectedVariantId,
+        quantity: qty
+      }
+    ],
+    custom_fields_data: Object.keys(customFieldsData).length > 0 ? customFieldsData : null,
+    coupon_code: appliedCouponCode,
+    delivery_type: getSelectedDeliveryType(),
+  };
+
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error((data && data.detail) ? formatError(data.detail) : `Error (${res.status})`);
+    }
+
+    if (HAS_META_PIXEL) {
+      fbq('track', 'Purchase', {
+        content_ids: [String(PRODUCT_ID)],
+        content_type: 'product',
+        value: totalUnits,
+        currency: isoCurrency(),
+        num_items: qty,
+      });
+    }
+    if (HAS_TIKTOK_PIXEL) {
+      ttq.track('PlaceAnOrder', {
+        content_id: String(PRODUCT_ID),
+        content_type: 'product',
+        value: totalUnits,
+        currency: isoCurrency(),
+        quantity: qty,
+      });
+    }
+
+    orderForm.style.display = 'none';
+    showAlert(orderSuccess, THANK_YOU_MESSAGE || translations[currentLang].success);
+  } catch (err) {
+    showAlert(orderErr, translations[currentLang].error + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = translations[currentLang].orderNow;
+  }
+});
+</script>
+<script>
+(function(){
+  try {
+    let vid = localStorage.getItem("oxyde_visitor_id");
+    if (!vid) { vid = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("oxyde_visitor_id", vid); }
+    fetch("/track-view", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ path: location.pathname, visitor_id: vid }), keepalive: true }).catch(function(){});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
+

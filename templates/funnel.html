@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="{{ funnel.language }}" dir="{{ 'rtl' if funnel.language == 'ar' else 'ltr' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="{{ funnel.title }} — {{ store.name }}">
+<meta property="og:description" content="{{ product.description or funnel.title }}">
+<meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.hostname }}{{ product.image_url or '' }}">
+<meta property="og:type" content="product">
+<title>{{ funnel.title }} — {{ store.name }}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+
+{{ custom_style_css|safe }}
+
+{% set fb_pixel = funnel.meta_pixel_id or store.meta_pixel_id %}
+{% set tt_pixel = funnel.tiktok_pixel_id or store.tiktok_pixel_id %}
+
+{% if fb_pixel %}
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '{{ fb_pixel }}');
+fbq('track', 'PageView');
+</script>
+{% endif %}
+
+{% if tt_pixel %}
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<e.methods.length;n++)ttq.setAndDefer(e,e.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+  ttq.load('{{ tt_pixel }}');
+  ttq.page();
+}(window, document, 'ttq');
+</script>
+{% endif %}
+
+</head>
+<body class="{{ store.template }}">
+
+<div class="product-hero">
+  <a href="/" class="brand" style="justify-content:center; margin-bottom:18px; text-decoration:none;">
+    <span class="brand-mark"></span>
+    <span style="font-family:'Cairo',sans-serif; font-weight:900; font-size:18px;">{{ store.name }}</span>
+  </a>
+
+  <div class="product-media">
+    <div class="product-image {{ 'no-img' if not product.image_url else '' }}" id="mainImageWrap">
+      {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.name }}" id="mainProductImage">
+      {% else %}
+        <span>{{ 'No Image' if funnel.language == 'en' else ('Pas d\'image' if funnel.language == 'fr' else 'لا توجد صورة') }}</span>
+      {% endif %}
+    </div>
+
+    {% set gallery_extra = product.images | rejectattr('image_url', 'equalto', product.image_url) | list %}
+    {% if product.image_url and gallery_extra %}
+    <div class="gallery-thumbs">
+      <button type="button" class="gallery-thumb active" onclick="switchMainImage('{{ product.image_url }}', this)">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+      </button>
+      {% for img in gallery_extra %}
+      <button type="button" class="gallery-thumb" onclick="switchMainImage('{{ img.image_url }}', this)">
+        <img src="{{ img.image_url }}" alt="{{ product.name }}">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <h1 class="product-name">{{ funnel.title }}</h1>
+  {% if product.description %}<div class="product-desc">{{ product.description }}</div>{% endif %}
+
+  <div class="product-price" id="productPrice">
+    {{ "%.2f"|format(product.price_cents / 100) }} {{ product.currency }}
+  </div>
+  <div class="product-delivery" id="deliveryText">
+    + <span id="deliveryPriceDisplay">{{ "%.2f"|format(default_delivery / 100) }}</span> {{ product.currency }}
+    <span>{{ 'Delivery fee' if funnel.language == 'en' else ('Frais de livraison' if funnel.language == 'fr' else 'سعر التوصيل') }}</span>
+  </div>
+
+  {% if product.variants and product.variants|length > 0 %}
+  <div class="field variant-select-wrap" style="margin-top:14px;">
+    <label for="variantSelect">{{ 'Choose an option' if funnel.language == 'en' else ('Choisir une option' if funnel.language == 'fr' else 'اختر خيار') }}</label>
+    <select id="variantSelect" onchange="onVariantChange()">
+      <option value="">{{ product.name }} ({{ "%.2f"|format(product.price_cents/100) }} {{ product.currency }})</option>
+      {% for v in product.variants %}
+        {% if v.is_active %}
+        <option value="{{ v.id }}" data-price="{{ v.price_cents if v.price_cents is not none else product.price_cents }}" data-qty="{{ v.quantity }}">{{ v.name }} ({{ "%.2f"|format((v.price_cents if v.price_cents is not none else product.price_cents)/100) }} {{ product.currency }}){% if v.quantity == 0 %} — {{ 'Out of stock' if funnel.language == 'en' else ('Rupture de stock' if funnel.language == 'fr' else 'نفذت الكمية') }}{% endif %}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <div class="order-section">
+    <div class="eyebrow">{{ 'ORDER NOW' if funnel.language == 'en' else ('COMMANDER' if funnel.language == 'fr' else 'اطلب الآن') }}</div>
+    <div class="alert alert-error" id="orderErr"></div>
+    <div class="alert alert-success" id="orderSuccess" style="display:none;"></div>
+
+    <form id="orderForm">
+      {% if form_fields %}{% for f in form_fields %}{% if f.enabled %}
+
+        {% if f.name == 'full_name' %}
+        <div class="field">
+          <label for="orderFullName">{{ 'Full Name' if funnel.language == 'en' else ('Nom complet' if funnel.language == 'fr' else 'الاسم الكامل') }}</label>
+          <input type="text" id="orderFullName" {{ 'required' if f.required else '' }}>
+        </div>
+        {% endif %}
+
+        {% if f.name == 'phone' %}
+        <div class="field">
+          <label for="orderPhone">{{ 'Phone' if funnel.language == 'en' else ('Téléphone' if funnel.language == 'fr' else 'رقم الهاتف') }}</label>
+          <input type="tel" id="orderPhone" {{ 'required' if f.required else '' }} placeholder="05XXXXXXXX">
+        </div>
+        {% endif %}
+
+        {% if f.name == 'province' %}
+        <div class="field">
+          <label for="orderProvince">{{ 'Province' if funnel.language == 'en' else ('Wilaya' if funnel.language == 'fr' else 'الولاية') }}</label>
+          <select id="orderProvince" class="province-select" {{ 'required' if f.required else '' }} onchange="updateDeliveryPrice()">
+            <option value="">{{ 'Select province' if funnel.language == 'en' else ('Choisir la wilaya' if funnel.language == 'fr' else 'اختر الولاية') }}</option>
+            {% set province_names = provinces_en if funnel.language == 'en' else (provinces_fr if funnel.language == 'fr' else provinces_ar) %}
+            {% for code, name in province_names.items() %}
+            <option value="{{ code }}">{{ code }} — {{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field" id="deliveryTypeWrap" style="display:none;">
+          <label>{{ 'Delivery Type' if funnel.language == 'en' else ('Type de livraison' if funnel.language == 'fr' else 'نوع التوصيل') }}</label>
+          <div style="display:flex; gap:14px; margin-top:4px;">
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+              <input type="radio" name="deliveryType" value="home" checked onchange="updateDeliveryPrice()">
+              <span>{{ 'Home Delivery' if funnel.language == 'en' else ('Livraison à domicile' if funnel.language == 'fr' else 'توصيل للمنزل') }}</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+              <input type="radio" name="deliveryType" value="stop_desk" onchange="updateDeliveryPrice()">
+              <span>{{ 'Stop-Desk' if funnel.language == 'en' else ('Stop-Desk' if funnel.language == 'fr' else 'توصيل للمكتب (Stop-Desk)') }}</span>
+            </label>
+          </div>
+        </div>
+        {% endif %}
+
+      {% endif %}{% endfor %}{% endif %}
+
+      <div class="field">
+        <label for="orderQuantity">{{ 'Quantity' if funnel.language == 'en' else ('Quantité' if funnel.language == 'fr' else 'الكمية') }}</label>
+        <input type="number" id="orderQuantity" required min="1" value="1" max="{{ product.quantity }}">
+      </div>
+
+      <div class="field">
+        <label for="couponInput">{{ 'Have a coupon code?' if funnel.language == 'en' else ('Vous avez un code promo ?' if funnel.language == 'fr' else 'عندك كود خصم؟') }}</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="couponInput" style="flex:1; text-transform:uppercase;" placeholder="WELCOME10">
+          <button type="button" onclick="applyCoupon()" style="white-space:nowrap; padding:0 16px; background:var(--bg-plate-raised); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); cursor:pointer; font-size:14px;">{{ 'Apply' if funnel.language == 'en' else ('Appliquer' if funnel.language == 'fr' else 'طبّق') }}</button>
+        </div>
+        <div id="couponMsg" style="font-size:12px; margin-top:6px; display:none;"></div>
+      </div>
+
+      <div class="total-row">
+        <span class="total-label">{{ 'Total' if funnel.language == 'en' else ('Total' if funnel.language == 'fr' else 'الإجمالي') }}</span>
+        <span class="total-value" id="totalPrice">
+          {{ "%.2f"|format((product.price_cents + default_delivery) / 100) }} {{ product.currency }}
+        </span>
+      </div>
+
+      <button type="submit" class="btn" id="orderSubmitBtn">{{ funnel.cta_text or ('Order Now' if funnel.language == 'en' else ('Commander maintenant' if funnel.language == 'fr' else 'اطلب الآن')) }}</button>
+    </form>
+  </div>
+
+  {% if not is_diamond %}
+  <div style="text-align:center; padding:30px 0 10px; color:var(--text-faint); font-size:11px; font-family:'IBM Plex Mono',monospace;" dir="ltr">
+    powered by Oxyde
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function switchMainImage(url, btn) {
+  const img = document.getElementById('mainProductImage');
+  if (img) img.src = url;
+  document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+const STORE_ID = {{ store.id }};
+const PRODUCT_ID = {{ product.id }};
+const PRICE_CENTS = {{ product.price_cents }};
+const FUNNEL_SLUG = {{ funnel.slug | tojson }};
+const CURRENCY = "{{ product.currency }}";
+const DELIVERY_PRICES = {{ delivery_prices | tojson }};
+const STOP_DESK_PRICES = {{ stop_desk_prices | tojson }};
+const DEFAULT_DELIVERY = {{ default_delivery }};
+const HAS_META_PIXEL = {{ 'true' if (funnel.meta_pixel_id or store.meta_pixel_id) else 'false' }};
+const HAS_TIKTOK_PIXEL = {{ 'true' if (funnel.tiktok_pixel_id or store.tiktok_pixel_id) else 'false' }};
+const funnel_lang = "{{ funnel.language }}";
+const THANK_YOU_MESSAGE = {{ (funnel.thank_you_message or ('Your order has been sent successfully! We will contact you soon.' if funnel.language == 'en' else ('Votre commande a été envoyée avec succès ! Nous vous contacterons bientôt.' if funnel.language == 'fr' else 'تم إرسال طلبك بنجاح! سنتواصل معك قريبًا.'))) | tojson }};
+const ORDER_BTN_TEXT = {{ (funnel.cta_text or ('Order Now' if funnel.language == 'en' else ('Commander maintenant' if funnel.language == 'fr' else 'اطلب الآن'))) | tojson }};
+const ERROR_PREFIX = {{ ('Error: ' if funnel.language == 'en' else ('Erreur: ' if funnel.language == 'fr' else 'حدث خطأ: ')) | tojson }};
+
+const CURRENCY_ISO = { "DA": "DZD", "$": "USD", "£": "GBP" };
+function isoCurrency() { return CURRENCY_ISO[CURRENCY] || "USD"; }
+
+function formatPrice(cents) { return (cents / 100).toFixed(2) + ' ' + CURRENCY; }
+
+let selectedVariantPrice = PRICE_CENTS;
+let selectedVariantId = null;
+let appliedDiscountCents = 0;
+let appliedCouponCode = null;
+
+function onVariantChange() {
+  const sel = document.getElementById('variantSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt.value) {
+    selectedVariantPrice = parseInt(opt.dataset.price, 10);
+    selectedVariantId = parseInt(opt.value, 10);
+  } else {
+    selectedVariantPrice = PRICE_CENTS;
+    selectedVariantId = null;
+  }
+  updateTotal();
+}
+
+async function applyCoupon() {
+  const input = document.getElementById('couponInput');
+  const msg = document.getElementById('couponMsg');
+  const code = input.value.trim();
+  if (!code) return;
+
+  const qty = parseInt(document.getElementById('orderQuantity').value) || 1;
+  const subtotal = selectedVariantPrice * qty;
+
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/discount-codes/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, subtotal_cents: subtotal }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Invalid code');
+
+    appliedDiscountCents = data.discount_amount_cents;
+    appliedCouponCode = code;
+    msg.style.display = 'block';
+    msg.style.color = 'var(--success, #22c55e)';
+    const appliedText = funnel_lang === 'en' ? 'Coupon applied' : (funnel_lang === 'fr' ? 'Code appliqué' : 'تطبق الكود');
+    msg.textContent = `✓ ${appliedText} (-${formatPrice(appliedDiscountCents)})`;
+    updateTotal();
+  } catch (err) {
+    appliedDiscountCents = 0;
+    appliedCouponCode = null;
+    msg.style.display = 'block';
+    msg.style.color = 'var(--danger)';
+    msg.textContent = err.message;
+    updateTotal();
+  }
+}
+
+function getSelectedDeliveryType() {
+  const checked = document.querySelector('input[name="deliveryType"]:checked');
+  return checked ? checked.value : 'home';
+}
+
+function getDeliveryPrice() {
+  const provinceEl = document.getElementById('orderProvince');
+  if (!provinceEl) return DEFAULT_DELIVERY;
+  const province = provinceEl.value;
+  if (!province) return DEFAULT_DELIVERY;
+  const type = getSelectedDeliveryType();
+  if (type === 'stop_desk' && STOP_DESK_PRICES[province] != null) {
+    return STOP_DESK_PRICES[province];
+  }
+  return DELIVERY_PRICES[province] || DEFAULT_DELIVERY;
+}
+
+function updateDeliveryPrice() {
+  const provinceEl = document.getElementById('orderProvince');
+  const wrap = document.getElementById('deliveryTypeWrap');
+  const province = provinceEl ? provinceEl.value : '';
+  const hasStopDesk = province && STOP_DESK_PRICES[province] != null;
+  if (wrap) {
+    wrap.style.display = hasStopDesk ? 'block' : 'none';
+    if (!hasStopDesk) {
+      const homeRadio = document.querySelector('input[name="deliveryType"][value="home"]');
+      if (homeRadio) homeRadio.checked = true;
+    }
+  }
+  const delivery = getDeliveryPrice();
+  document.getElementById('deliveryPriceDisplay').textContent = (delivery / 100).toFixed(2);
+  updateTotal();
+}
+
+function updateTotal() {
+  const qty = parseInt(document.getElementById('orderQuantity').value) || 1;
+  const delivery = getDeliveryPrice();
+  const total = Math.max(0, (selectedVariantPrice * qty) + delivery - appliedDiscountCents);
+  document.getElementById('totalPrice').textContent = formatPrice(total);
+}
+
+document.getElementById('orderQuantity').addEventListener('input', updateTotal);
+
+const orderForm = document.getElementById('orderForm');
+const orderErr = document.getElementById('orderErr');
+const orderSuccess = document.getElementById('orderSuccess');
+
+function hideAlert(el) { el.style.display = 'none'; }
+function showAlert(el, message) { el.textContent = message; el.style.display = 'block'; }
+
+function formatError(detail) {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(d => d.msg).join(', ');
+  return 'An unexpected error occurred';
+}
+
+if (HAS_META_PIXEL) {
+  fbq('track', 'ViewContent', {
+    content_ids: [String(PRODUCT_ID)], content_type: 'product',
+    content_name: {{ funnel.title | tojson }}, value: PRICE_CENTS / 100, currency: isoCurrency(),
+  });
+}
+if (HAS_TIKTOK_PIXEL) {
+  ttq.track('ViewContent', {
+    content_id: String(PRODUCT_ID), content_type: 'product',
+    content_name: {{ funnel.title | tojson }}, value: PRICE_CENTS / 100, currency: isoCurrency(),
+  });
+}
+
+let checkoutStarted = false;
+function trackInitiateCheckoutOnce() {
+  if (checkoutStarted) return;
+  checkoutStarted = true;
+  if (HAS_META_PIXEL) {
+    fbq('track', 'InitiateCheckout', { content_ids: [String(PRODUCT_ID)], content_type: 'product', value: PRICE_CENTS / 100, currency: isoCurrency() });
+  }
+  if (HAS_TIKTOK_PIXEL) {
+    ttq.track('InitiateCheckout', { content_id: String(PRODUCT_ID), content_type: 'product', value: PRICE_CENTS / 100, currency: isoCurrency() });
+  }
+}
+orderForm.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('focus', trackInitiateCheckoutOnce, { once: true });
+});
+
+orderForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert(orderErr);
+  hideAlert(orderSuccess);
+  const btn = document.getElementById('orderSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = ORDER_BTN_TEXT + '...';
+
+  const qty = parseInt(document.getElementById('orderQuantity').value, 10);
+  const delivery = getDeliveryPrice();
+  const totalUnits = ((PRICE_CENTS * qty) + delivery) / 100;
+
+  const fullNameEl = document.getElementById('orderFullName');
+  const fullName = fullNameEl ? fullNameEl.value.trim() : '';
+  const nameParts = fullName.split(' ');
+  const provinceEl = document.getElementById('orderProvince');
+  const phoneEl = document.getElementById('orderPhone');
+
+  const payload = {
+    customer_first_name: nameParts[0] || '-',
+    customer_last_name: nameParts.slice(1).join(' ') || '-',
+    province: provinceEl ? provinceEl.value : '',
+    phone: phoneEl ? phoneEl.value.trim() : '',
+    items: [{ product_id: PRODUCT_ID, variant_id: selectedVariantId, quantity: qty }],
+    coupon_code: appliedCouponCode,
+    funnel_slug: FUNNEL_SLUG,
+    delivery_type: getSelectedDeliveryType(),
+  };
+
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error((data && data.detail) ? formatError(data.detail) : `Error (${res.status})`);
+    }
+
+    if (HAS_META_PIXEL) {
+      fbq('track', 'Purchase', { content_ids: [String(PRODUCT_ID)], content_type: 'product', value: totalUnits, currency: isoCurrency(), num_items: qty });
+    }
+    if (HAS_TIKTOK_PIXEL) {
+      ttq.track('PlaceAnOrder', { content_id: String(PRODUCT_ID), content_type: 'product', value: totalUnits, currency: isoCurrency(), quantity: qty });
+    }
+
+    orderForm.style.display = 'none';
+    showAlert(orderSuccess, THANK_YOU_MESSAGE);
+  } catch (err) {
+    showAlert(orderErr, ERROR_PREFIX + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = ORDER_BTN_TEXT;
+  }
+});
+</script>
+<script>
+(function(){
+  try {
+    let vid = localStorage.getItem("oxyde_visitor_id");
+    if (!vid) { vid = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("oxyde_visitor_id", vid); }
+    fetch("/track-view", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ path: location.pathname, visitor_id: vid, funnel_slug: FUNNEL_SLUG }), keepalive: true }).catch(function(){});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

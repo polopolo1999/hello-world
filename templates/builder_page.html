@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ store.name }}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+
+{{ custom_style_css|safe }}
+
+{% if store.meta_pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '{{ store.meta_pixel_id }}');
+fbq('track', 'PageView');
+</script>
+{% endif %}
+
+{% if store.tiktok_pixel_id %}
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<e.methods.length;n++)ttq.setAndDefer(e,e.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+  ttq.load('{{ store.tiktok_pixel_id }}');
+  ttq.page();
+}(window, document, 'ttq');
+</script>
+{% endif %}
+
+{% if store.google_tag_manager_id %}
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','{{ store.google_tag_manager_id }}');</script>
+{% endif %}
+
+<style>
+  .cart-icon-btn { position: fixed; top: 20px; right: 20px; background: var(--bg-plate-glass, rgba(26,26,37,.85)); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--text, #fff); border: 1px solid var(--border, #333); padding: 10px 15px; border-radius: 30px; cursor: pointer; z-index: 1000; display: flex; align-items: center; gap: 8px; font-family: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.15s ease, border-color 0.15s ease; }
+  .cart-icon-btn:hover { transform: translateY(-1px); border-color: var(--border-bright, #3f3f5a); }
+  [dir="rtl"] .cart-icon-btn { right: auto; left: 20px; }
+  .cart-badge { background: linear-gradient(135deg, var(--accent, #6366f1), var(--accent-2, #8b5cf6)); color: #fff; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold; }
+  .cart-drawer { position: fixed; top: 0; right: -400px; width: 100%; max-width: 380px; height: 100%; background: var(--bg-plate-glass, rgba(26,26,37,.85)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid var(--border, #333); box-shadow: -5px 0 25px rgba(0,0,0,0.5); z-index: 1100; transition: right 0.35s cubic-bezier(.22,1,.36,1); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; color: var(--text, #fff); }
+  [dir="rtl"] .cart-drawer { right: auto; left: -400px; border-left: none; border-right: 1px solid var(--border, #333); transition: left 0.3s ease; }
+  .cart-drawer.open { right: 0; }
+  [dir="rtl"] .cart-drawer.open { left: 0; }
+  .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #333); padding-bottom: 15px; }
+  .cart-close { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
+  .cart-items { flex: 1; overflow-y: auto; padding: 15px 0; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border, #222); padding-bottom: 10px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-title { font-weight: bold; font-size: 14px; }
+  .cart-item-price { font-size: 13px; color: var(--text-faint, #888); }
+  .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+  .cart-item-controls button { background: var(--bg-plate-raised, #222); border: 1px solid var(--border); color: #fff; width: 25px; height: 25px; cursor: pointer; border-radius: 4px; transition: border-color 0.15s ease, color 0.15s ease; }
+  .cart-item-controls button:hover { border-color: var(--accent); color: var(--accent-light); }
+  .cart-footer { border-top: 1px solid var(--border, #333); padding-top: 15px; }
+  .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; display: none; }
+  .cart-overlay.open { display: block; }
+
+  .hamburger-btn { background: none; border: none; color: inherit; cursor: pointer; padding: 6px; display: flex; align-items: center; }
+  .nav-menu-drawer { position: fixed; top: 0; left: -320px; width: 100%; max-width: 300px; height: 100%; background: var(--bg-plate-glass, rgba(26,26,37,.85)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border, #333); box-shadow: 5px 0 25px rgba(0,0,0,0.5); z-index: 1200; transition: left 0.35s cubic-bezier(.22,1,.36,1); padding: 20px; box-sizing: border-box; color: var(--text, #fff); }
+  [dir="rtl"] .nav-menu-drawer { left: auto; right: -320px; border-right: none; border-left: 1px solid var(--border, #333); transition: right 0.3s ease; }
+  .nav-menu-drawer.open { left: 0; }
+  [dir="rtl"] .nav-menu-drawer.open { right: 0; }
+  .nav-menu-header { display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border, #333); padding-bottom: 15px; margin-bottom: 10px; }
+  .nav-menu-close { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; }
+  .nav-menu-links { list-style: none; margin: 0; padding: 0; }
+  .nav-menu-links li a { display: block; padding: 14px 12px; color: inherit; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.15s ease, color 0.15s ease; }
+  .nav-menu-links li a:hover { background: var(--bg-plate, #1a1a1a); color: var(--accent-light, #818cf8); }
+</style>
+{{ sb_css|safe }}
+</head>
+<body class="{{ store.template }}">
+{% if store.google_tag_manager_id %}
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ store.google_tag_manager_id }}"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+{% endif %}
+
+<header class="site-nav">
+  <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+  </button>
+  <a href="/" class="brand" style="text-decoration:none;">
+    <span class="brand-mark"></span>
+    <span style="font-family:'Cairo',sans-serif; font-weight:900;">{{ store.name }}</span>
+  </a>
+  <div class="nav-right">
+    <button class="cart-icon-btn-inline" onclick="toggleCart()" aria-label="Cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="nav-menu-drawer" id="navMenuDrawer">
+  <div class="nav-menu-header">
+    <strong>القائمة</strong>
+    <button class="nav-menu-close" onclick="toggleNavMenu()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+  </div>
+  <ul class="nav-menu-links">
+    {% for link in nav_links %}
+    <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+<div class="cart-overlay" id="navMenuOverlay" onclick="toggleNavMenu()"></div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h3>سلة المشتريات</h3>
+    <button class="cart-close" onclick="toggleCart()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer"></div>
+  <div class="cart-footer" id="cartFooterSection" style="display:none;">
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;">الاسم</label>
+      <input type="text" id="cartFirstName" required style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;">اللقب</label>
+      <input type="text" id="cartLastName" required style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;">الولاية</label>
+      <select id="cartProvince" required onchange="updateCartTotal()" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+        <option value="">اختر الولاية</option>
+        {% for code, name in provinces_en.items() %}
+        <option value="{{ code }}">{{ code }} — {{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="margin-bottom: 10px; display:none;" id="cartDeliveryTypeWrap">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;">نوع التوصيل</label>
+      <div style="display:flex; gap:14px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+          <input type="radio" name="cartDeliveryType" value="home" checked onchange="updateCartTotal()">
+          <span>توصيل للمنزل</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+          <input type="radio" name="cartDeliveryType" value="stop_desk" onchange="updateCartTotal()">
+          <span>توصيل للمكتب (Stop-Desk)</span>
+        </label>
+      </div>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;">رقم الهاتف</label>
+      <input type="tel" id="cartPhone" required placeholder="05XXXXXXXX" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="display:flex; justify-content:space-between; font-weight:bold; margin: 15px 0;">
+      <span>الإجمالي</span>
+      <span id="cartTotalPrice">0.00</span>
+    </div>
+    <button class="btn" id="cartSubmitBtn" onclick="submitCartOrder()">اطلب الآن</button>
+  </div>
+</div>
+
+{{ body_html|safe }}
+
+{% if not is_diamond %}
+<div style="text-align:center; padding:30px 0 10px; color:var(--text-faint); font-size:11px; font-family:'IBM Plex Mono',monospace;" dir="ltr">
+  powered by Oxyde
+</div>
+{% endif %}
+
+<script>
+const STORE_ID = {{ store.id }};
+const DEFAULT_DELIVERY = {{ store.default_delivery_price }};
+const DELIVERY_PRICES = {{ delivery_prices | tojson }};
+const STOP_DESK_PRICES = {{ stop_desk_prices | tojson }};
+document.documentElement.dir = 'rtl';
+document.documentElement.lang = 'ar';
+
+function toggleNavMenu() {
+  document.getElementById('navMenuDrawer').classList.toggle('open');
+  document.getElementById('navMenuOverlay').classList.toggle('open');
+}
+
+function getCart() {
+  try { return JSON.parse(localStorage.getItem(`cart_${STORE_ID}`)) || []; } catch (e) { return []; }
+}
+function saveCart(cart) {
+  localStorage.setItem(`cart_${STORE_ID}`, JSON.stringify(cart));
+  updateCartBadge();
+}
+function updateCartBadge() {
+  const cart = getCart();
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const badge = document.getElementById('cartCount');
+  if (badge) badge.textContent = totalQty;
+}
+function toggleCart() {
+  document.getElementById('cartDrawer').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+  renderCart();
+}
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('add-to-cart-btn')) {
+    const btn = e.target;
+    const isBundle = !!btn.dataset.bundleId;
+    const itemId = isBundle ? parseInt(btn.dataset.bundleId) : parseInt(btn.dataset.id);
+    const name = btn.dataset.name;
+    const priceCents = parseInt(btn.dataset.price);
+    const currency = btn.dataset.currency;
+    let cart = getCart();
+    const existing = cart.find(i => isBundle ? i.bundle_id === itemId : i.product_id === itemId);
+    if (existing) { existing.quantity += 1; }
+    else if (isBundle) { cart.push({ bundle_id: itemId, name: name, price_cents: priceCents, currency: currency, quantity: 1 }); }
+    else { cart.push({ product_id: itemId, name: name, price_cents: priceCents, currency: currency, quantity: 1 }); }
+    saveCart(cart);
+    toggleCart();
+  }
+});
+function changeQty(productId, delta, bundleId) {
+  let cart = getCart();
+  const isBundle = !!bundleId;
+  const item = cart.find(i => isBundle ? i.bundle_id === bundleId : i.product_id === productId);
+  if (item) {
+    item.quantity += delta;
+    if (item.quantity <= 0) cart = cart.filter(i => isBundle ? i.bundle_id !== bundleId : i.product_id !== productId);
+  }
+  saveCart(cart);
+  renderCart();
+}
+function renderCart() {
+  const cart = getCart();
+  const container = document.getElementById('cartItemsContainer');
+  const footer = document.getElementById('cartFooterSection');
+  if (cart.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-faint); margin-top:40px;">سلة المشتريات فارغة</div>`;
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'block';
+  container.innerHTML = '';
+  let subtotal = 0;
+  let currency = cart[0].currency || 'دج';
+  cart.forEach(item => {
+    subtotal += item.price_cents * item.quantity;
+    container.innerHTML += `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-title">${item.name}</div>
+          <div class="cart-item-price">${(item.price_cents / 100).toFixed(2)} ${item.currency}</div>
+        </div>
+        <div class="cart-item-controls">
+          <button type="button" onclick="changeQty(${item.product_id}, -1, ${item.bundle_id || null})">-</button>
+          <span>${item.quantity}</span>
+          <button type="button" onclick="changeQty(${item.product_id}, 1, ${item.bundle_id || null})">+</button>
+        </div>
+      </div>`;
+  });
+  updateCartTotal(subtotal, currency);
+}
+function getCartDeliveryPrice() {
+  const provinceEl = document.getElementById('cartProvince');
+  const province = provinceEl ? provinceEl.value : '';
+  const wrap = document.getElementById('cartDeliveryTypeWrap');
+  const hasStopDesk = province && STOP_DESK_PRICES[province] != null;
+  if (wrap) {
+    wrap.style.display = hasStopDesk ? 'block' : 'none';
+    if (!hasStopDesk) {
+      const homeRadio = document.querySelector('input[name="cartDeliveryType"][value="home"]');
+      if (homeRadio) homeRadio.checked = true;
+    }
+  }
+  if (!province) return DEFAULT_DELIVERY;
+  const checked = document.querySelector('input[name="cartDeliveryType"]:checked');
+  const type = checked ? checked.value : 'home';
+  if (type === 'stop_desk' && STOP_DESK_PRICES[province] != null) {
+    return STOP_DESK_PRICES[province];
+  }
+  return DELIVERY_PRICES[province] != null ? DELIVERY_PRICES[province] : DEFAULT_DELIVERY;
+}
+function updateCartTotal(subtotal, currency) {
+  const cart = getCart();
+  if (!subtotal) {
+    subtotal = cart.reduce((sum, i) => sum + (i.price_cents * i.quantity), 0);
+    currency = cart.length > 0 ? cart[0].currency : 'دج';
+  }
+  const delivery = getCartDeliveryPrice();
+  const total = subtotal + delivery;
+  document.getElementById('cartTotalPrice').textContent = (total / 100).toFixed(2) + ' ' + currency;
+}
+async function submitCartOrder() {
+  const cart = getCart();
+  if (cart.length === 0) return;
+  const firstName = document.getElementById('cartFirstName').value.trim();
+  const lastName = document.getElementById('cartLastName').value.trim();
+  const province = document.getElementById('cartProvince').value;
+  const phone = document.getElementById('cartPhone').value.trim();
+  if (!firstName || !lastName || !province || !phone) {
+    alert("يرجى ملء جميع الحقول المطلوبة");
+    return;
+  }
+  const itemsPayload = cart.map(i => (i.bundle_id ? { bundle_id: Number(i.bundle_id), quantity: Number(i.quantity) } : { product_id: Number(i.product_id), quantity: Number(i.quantity) }));
+  const payload = {
+    customer_first_name: firstName,
+    customer_last_name: lastName,
+    province: province,
+    phone: phone,
+    items: itemsPayload,
+    delivery_type: (function() {
+      const checked = document.querySelector('input[name="cartDeliveryType"]:checked');
+      return checked ? checked.value : 'home';
+    })(),
+  };
+  const btn = document.getElementById('cartSubmitBtn');
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.detail) ? data.detail : 'Error');
+    localStorage.removeItem(`cart_${STORE_ID}`);
+    alert("تم إرسال طلبك بنجاح!");
+    toggleCart();
+    location.reload();
+  } catch (err) {
+    alert("خطأ: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+updateCartBadge();
+</script>
+<script>
+(function(){
+  try {
+    let vid = localStorage.getItem("oxyde_visitor_id");
+    if (!vid) { vid = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("oxyde_visitor_id", vid); }
+    fetch("/track-view", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ path: location.pathname, visitor_id: vid }), keepalive: true }).catch(function(){});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ store.name }}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+
+{{ custom_style_css|safe }}
+
+{% if store.meta_pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '{{ store.meta_pixel_id }}');
+fbq('track', 'PageView');
+</script>
+{% endif %}
+
+{% if store.tiktok_pixel_id %}
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<e.methods.length;n++)ttq.setAndDefer(e,e.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+  ttq.load('{{ store.tiktok_pixel_id }}');
+  ttq.page();
+}(window, document, 'ttq');
+</script>
+{% endif %}
+
+<style>
+  .cart-icon-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-plate-glass, rgba(26,26,37,.85));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--text, #fff);
+    border: 1px solid var(--border, #333);
+    padding: 10px 15px;
+    border-radius: 30px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .cart-icon-btn:hover { transform: translateY(-1px); border-color: var(--border-bright, #3f3f5a); }
+  [dir="rtl"] .cart-icon-btn { right: auto; left: 20px; }
+  .cart-badge {
+    background: linear-gradient(135deg, var(--accent, #6366f1), var(--accent-2, #8b5cf6));
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .cart-drawer {
+    position: fixed;
+    top: 0; right: -400px;
+    width: 100%; max-width: 380px;
+    height: 100%;
+    background: var(--bg-plate-glass, rgba(26,26,37,.85));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border, #333);
+    box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+    z-index: 1100;
+    transition: right 0.35s cubic-bezier(.22,1,.36,1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    color: var(--text, #fff);
+  }
+  [dir="rtl"] .cart-drawer { right: auto; left: -400px; border-left: none; border-right: 1px solid var(--border, #333); transition: left 0.3s ease; }
+  .cart-drawer.open { right: 0; }
+  [dir="rtl"] .cart-drawer.open { left: 0; }
+  .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #333); padding-bottom: 15px; }
+  .cart-close { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
+  .cart-items { flex: 1; overflow-y: auto; padding: 15px 0; }
+  .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border, #222); padding-bottom: 10px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-title { font-weight: bold; font-size: 14px; }
+  .cart-item-price { font-size: 13px; color: var(--text-faint, #888); }
+  .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+  .cart-item-controls button { background: var(--bg-plate-raised, #222); border: 1px solid var(--border); color: #fff; width: 25px; height: 25px; cursor: pointer; border-radius: 4px; transition: border-color 0.15s ease, color 0.15s ease; }
+  .cart-item-controls button:hover { border-color: var(--accent); color: var(--accent-light); }
+  .cart-footer { border-top: 1px solid var(--border, #333); padding-top: 15px; }
+  .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; display: none; }
+  .cart-overlay.open { display: block; }
+
+  .hamburger-btn { background: none; border: none; color: inherit; cursor: pointer; padding: 6px; display: flex; align-items: center; }
+  .nav-menu-drawer { position: fixed; top: 0; left: -320px; width: 100%; max-width: 300px; height: 100%; background: var(--bg-plate-glass, rgba(26,26,37,.85)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border, #333); box-shadow: 5px 0 25px rgba(0,0,0,0.5); z-index: 1200; transition: left 0.35s cubic-bezier(.22,1,.36,1); padding: 20px; box-sizing: border-box; color: var(--text, #fff); }
+  [dir="rtl"] .nav-menu-drawer { left: auto; right: -320px; border-right: none; border-left: 1px solid var(--border, #333); transition: right 0.3s ease; }
+  .nav-menu-drawer.open { left: 0; }
+  [dir="rtl"] .nav-menu-drawer.open { right: 0; }
+  .nav-menu-header { display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border, #333); padding-bottom: 15px; margin-bottom: 10px; }
+  .nav-menu-close { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; }
+  .nav-menu-links { list-style: none; margin: 0; padding: 0; }
+  .nav-menu-links li a { display: block; padding: 14px 12px; color: inherit; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.15s ease, color 0.15s ease; }
+  .nav-menu-links li a:hover { background: var(--bg-plate, #1a1a1a); color: var(--accent-light, #818cf8); }
+</style>
+{{ sb_css|safe }}
+</head>
+<body class="{{ store.template }}">
+
+<header class="site-nav">
+  <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+  </button>
+  <a href="/" class="brand" style="text-decoration:none;">
+    <span class="brand-mark"></span>
+    <span style="font-family:'Cairo',sans-serif; font-weight:900;">{{ store.name }}</span>
+  </a>
+  <div class="nav-right">
+    <div class="lang-switcher-inline">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" data-lang="ar" onclick="setLang('ar')">AR</button>
+    </div>
+    <button class="cart-icon-btn-inline" onclick="toggleCart()" aria-label="Cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="nav-menu-drawer" id="navMenuDrawer">
+  <div class="nav-menu-header">
+    <strong data-i18n="menuTitle">Menu</strong>
+    <button class="nav-menu-close" onclick="toggleNavMenu()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+  </div>
+  <ul class="nav-menu-links">
+    {% for link in nav_links %}
+    <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+<div class="cart-overlay" id="navMenuOverlay" onclick="toggleNavMenu()"></div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h3 data-i18n="shoppingCart">Shopping Cart</h3>
+    <button class="cart-close" onclick="toggleCart()"><svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg></button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer"></div>
+  <div class="cart-footer" id="cartFooterSection" style="display:none;">
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;" data-i18n="firstName">First Name</label>
+      <input type="text" id="cartFirstName" required style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;" data-i18n="lastName">Last Name</label>
+      <input type="text" id="cartLastName" required style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;" data-i18n="province">Province</label>
+      <select id="cartProvince" required onchange="updateCartTotal()" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+        <option value="" data-i18n="selectProvince">Select province</option>
+        {% for code, name in provinces_en.items() %}
+        <option value="{{ code }}">{{ code }} — {{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="margin-bottom: 10px; display:none;" id="cartDeliveryTypeWrap">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;" data-i18n="deliveryTypeLabel">Delivery Type</label>
+      <div style="display:flex; gap:14px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+          <input type="radio" name="cartDeliveryType" value="home" checked onchange="updateCartTotal()">
+          <span data-i18n="deliveryHome">Home Delivery</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+          <input type="radio" name="cartDeliveryType" value="stop_desk" onchange="updateCartTotal()">
+          <span data-i18n="deliveryStopDesk">Stop-Desk</span>
+        </label>
+      </div>
+    </div>
+    <div style="margin-bottom: 10px;">
+      <label style="font-size: 12px; display:block; margin-bottom:4px;" data-i18n="phone">Phone</label>
+      <input type="tel" id="cartPhone" required placeholder="05XXXXXXXX" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-plate); color:inherit;">
+    </div>
+    <div style="display:flex; justify-content:space-between; font-weight:bold; margin: 15px 0;">
+      <span data-i18n="total">Total</span>
+      <span id="cartTotalPrice">0.00</span>
+    </div>
+    <button class="btn" id="cartSubmitBtn" onclick="submitCartOrder()" data-i18n="orderNow">Order Now</button>
+  </div>
+</div>
+
+{% if builder_home_html %}
+{{ builder_home_html|safe }}
+{% else %}
+<div class="trust-bar">
+  <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> <span data-i18n="trustSecure">Secure Checkout</span></span>
+  <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg> <span data-i18n="trustDelivery">Fast Delivery</span></span>
+  <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle></svg> <span data-i18n="trustCod">Cash on Delivery</span></span>
+</div>
+
+{% if products %}
+<div class="product-grid">
+  {% for p in products %}
+  <div class="product-card fade-in-up" style="--delay: {{ (loop.index0 * 0.06)|round(2) }}s" data-product-id="{{ p.id }}">
+    <a href="/product/{{ p.id }}?lang=en" style="text-decoration:none; color:inherit; display:block;">
+      <div class="pc-image" style="position:relative;">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}">
+        {% else %}
+          <span data-i18n="noImage">No Image</span>
+        {% endif %}
+        {% if p.compare_at_price_cents and p.compare_at_price_cents > p.price_cents %}
+        <span class="pc-sale-tag">-{{ ((1 - (p.price_cents / p.compare_at_price_cents)) * 100) | round | int }}%</span>
+        {% endif %}
+      </div>
+      <div class="pc-body">
+        {% if p.show_urgency and p.quantity > 0 and p.quantity <= 10 %}
+        <div class="badge-row" style="justify-content:flex-start; margin-top:0;">
+          <span class="badge badge-urgency urgency-badge" data-qty="{{ p.quantity }}">{{ p.quantity }} left</span>
+        </div>
+        {% endif %}
+        <div class="pc-name">{{ p.name }}</div>
+        {% if p.description %}<div class="pc-desc">{{ p.description }}</div>{% endif %}
+      </div>
+    </a>
+    
+    <div class="pc-body" style="padding-top: 0;">
+      <div class="pc-footer">
+        <span class="pc-price">{{ "%.2f"|format(p.price_cents / 100) }} {{ p.currency }}{% if p.compare_at_price_cents and p.compare_at_price_cents > p.price_cents %}<span class="pc-price-compare">{{ "%.2f"|format(p.compare_at_price_cents / 100) }} {{ p.currency }}</span>{% endif %}</span>
+        {% if p.quantity > 0 %}
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="pc-btn add-to-cart-btn" 
+                  data-id="{{ p.id }}" 
+                  data-name="{{ p.name }}" 
+                  data-price="{{ p.price_cents }}" 
+                  data-currency="{{ p.currency }}" 
+                  data-i18n="addToCart">Add</button>
+          <button type="button" class="pc-btn" onclick="window.location.href='/product/{{ p.id }}?lang=en'" data-i18n="orderNow">Order</button>
+        </div>
+        {% else %}
+        <span class="badge badge-outofstock" data-i18n="outOfStock">Out of Stock</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state" style="padding:60px 20px;">
+  <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
+  <span data-i18n="noProducts">No products in this store yet.</span>
+</div>
+{% endif %}
+{% endif %}
+
+{% if not is_diamond %}
+<div style="text-align:center; padding:20px; color:var(--text-faint); font-size:11px; font-family:'IBM Plex Mono',monospace;" dir="ltr">
+  powered by Oxyde
+</div>
+{% endif %}
+
+<script>
+const STORE_ID = {{ store.id }};
+const DEFAULT_DELIVERY = {{ store.default_delivery_price }};
+const DELIVERY_PRICES = {{ delivery_prices | tojson }};
+const STOP_DESK_PRICES = {{ stop_desk_prices | tojson }};
+
+const texts = {
+  en: { 
+    noImage: "No Image", outOfStock: "Out of Stock", orderNow: "Order Now", noProducts: "No products in this store yet.",
+    cart: "Cart", shoppingCart: "Shopping Cart", addToCart: "Add", firstName: "First Name", lastName: "Last Name",
+    province: "Province", selectProvince: "Select province", phone: "Phone", total: "Total", emptyCart: "Your cart is empty.",
+    trustSecure: "Secure Checkout", trustDelivery: "Fast Delivery", trustCod: "Cash on Delivery", onlyLeftShort: "Only {n} left",
+    deliveryTypeLabel: "Delivery Type", deliveryHome: "Home Delivery", deliveryStopDesk: "Stop-Desk"
+  },
+  fr: { 
+    noImage: "Pas d'image", outOfStock: "Rupture de stock", orderNow: "Commander", noProducts: "Aucun produit dans cette boutique.",
+    cart: "Panier", shoppingCart: "Panier d'achat", addToCart: "Ajouter", firstName: "Prénom", lastName: "Nom",
+    province: "Wilaya", selectProvince: "Choisir la wilaya", phone: "Téléphone", total: "Total", emptyCart: "Votre panier est vide.",
+    trustSecure: "Paiement Sécurisé", trustDelivery: "Livraison Rapide", trustCod: "Paiement à la Livraison", onlyLeftShort: "Plus que {n}",
+    deliveryTypeLabel: "Type de livraison", deliveryHome: "Livraison à domicile", deliveryStopDesk: "Stop-Desk"
+  },
+  ar: { 
+    noImage: "لا توجد صورة", outOfStock: "نفذت الكمية", orderNow: "اطلب الآن", noProducts: "لا توجد منتجات في هذا المتجر بعد.",
+    cart: "السلة", shoppingCart: "سلة المشتريات", addToCart: "أضف", firstName: "الاسم", lastName: "اللقب",
+    trustSecure: "دفع آمن", trustDelivery: "توصيل سريع", trustCod: "الدفع عند الاستلام", onlyLeftShort: "باقي {n} فقط",
+    province: "الولاية", selectProvince: "اختر الولاية", phone: "رقم الهاتف", total: "الإجمالي", emptyCart: "سلة المشتريات فارغة.",
+    deliveryTypeLabel: "نوع التوصيل", deliveryHome: "توصيل للمنزل", deliveryStopDesk: "توصيل للمكتب (Stop-Desk)"
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  if (lang === 'ar') { document.documentElement.dir = 'rtl'; document.documentElement.lang = 'ar'; }
+  else { document.documentElement.dir = 'ltr'; document.documentElement.lang = lang; }
+  
+  document.querySelectorAll('.product-card').forEach(card => {
+    const pid = card.dataset.productId;
+    const link = card.querySelector('a');
+    if (link) link.href = `/product/${pid}?lang=${lang}`;
+  });
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (texts[lang][key]) el.textContent = texts[lang][key];
+  });
+  document.querySelectorAll('.urgency-badge').forEach(el => {
+    const qty = el.dataset.qty;
+    const tpl = texts[lang].onlyLeftShort || 'Only {n} left';
+    el.textContent = tpl.replace('{n}', qty);
+  });
+  renderCart();
+}
+
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem(`cart_${STORE_ID}`)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCart(cart) {
+  localStorage.setItem(`cart_${STORE_ID}`, JSON.stringify(cart));
+  updateCartBadge();
+}
+
+function updateCartBadge() {
+  const cart = getCart();
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const badge = document.getElementById('cartCount');
+  if (badge) badge.textContent = totalQty;
+}
+
+function toggleCart() {
+  document.getElementById('cartDrawer').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+  renderCart();
+}
+
+function toggleNavMenu() {
+  document.getElementById('navMenuDrawer').classList.toggle('open');
+  document.getElementById('navMenuOverlay').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('add-to-cart-btn')) {
+    const btn = e.target;
+    const isBundle = !!btn.dataset.bundleId;
+    const itemId = isBundle ? parseInt(btn.dataset.bundleId) : parseInt(btn.dataset.id);
+    const name = btn.dataset.name;
+    const priceCents = parseInt(btn.dataset.price);
+    const currency = btn.dataset.currency;
+
+    let cart = getCart();
+    const existing = cart.find(i => isBundle ? i.bundle_id === itemId : i.product_id === itemId);
+    if (existing) {
+      existing.quantity += 1;
+    } else if (isBundle) {
+      cart.push({ bundle_id: itemId, name: name, price_cents: priceCents, currency: currency, quantity: 1 });
+    } else {
+      cart.push({ product_id: itemId, name: name, price_cents: priceCents, currency: currency, quantity: 1 });
+    }
+    saveCart(cart);
+    toggleCart();
+  }
+});
+
+function changeQty(productId, delta, bundleId) {
+  let cart = getCart();
+  const isBundle = !!bundleId;
+  const item = cart.find(i => isBundle ? i.bundle_id === bundleId : i.product_id === productId);
+  if (item) {
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      cart = cart.filter(i => isBundle ? i.bundle_id !== bundleId : i.product_id !== productId);
+    }
+  }
+  saveCart(cart);
+  renderCart();
+}
+
+function renderCart() {
+  const cart = getCart();
+  const container = document.getElementById('cartItemsContainer');
+  const footer = document.getElementById('cartFooterSection');
+  
+  if (cart.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-faint); margin-top:40px;">${texts[currentLang].emptyCart}</div>`;
+    footer.style.display = 'none';
+    return;
+  }
+  
+  footer.style.display = 'block';
+  container.innerHTML = '';
+  let subtotal = 0;
+  let currency = cart[0].currency || 'DA';
+
+  cart.forEach(item => {
+    subtotal += item.price_cents * item.quantity;
+    container.innerHTML += `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-title">${item.name}</div>
+          <div class="cart-item-price">${(item.price_cents / 100).toFixed(2)} ${item.currency}</div>
+        </div>
+        <div class="cart-item-controls">
+          <button type="button" onclick="changeQty(${item.product_id}, -1, ${item.bundle_id || null})">-</button>
+          <span>${item.quantity}</span>
+          <button type="button" onclick="changeQty(${item.product_id}, 1, ${item.bundle_id || null})">+</button>
+        </div>
+      </div>
+    `;
+  });
+
+  updateCartTotal(subtotal, currency);
+}
+
+function getCartDeliveryPrice() {
+  const provinceEl = document.getElementById('cartProvince');
+  const province = provinceEl ? provinceEl.value : '';
+  const wrap = document.getElementById('cartDeliveryTypeWrap');
+  const hasStopDesk = province && STOP_DESK_PRICES[province] != null;
+  if (wrap) {
+    wrap.style.display = hasStopDesk ? 'block' : 'none';
+    if (!hasStopDesk) {
+      const homeRadio = document.querySelector('input[name="cartDeliveryType"][value="home"]');
+      if (homeRadio) homeRadio.checked = true;
+    }
+  }
+  if (!province) return DEFAULT_DELIVERY;
+  const checked = document.querySelector('input[name="cartDeliveryType"]:checked');
+  const type = checked ? checked.value : 'home';
+  if (type === 'stop_desk' && STOP_DESK_PRICES[province] != null) {
+    return STOP_DESK_PRICES[province];
+  }
+  return DELIVERY_PRICES[province] != null ? DELIVERY_PRICES[province] : DEFAULT_DELIVERY;
+}
+
+function updateCartTotal(subtotal, currency) {
+  const cart = getCart();
+  if (!subtotal) {
+    subtotal = cart.reduce((sum, i) => sum + (i.price_cents * i.quantity), 0);
+    currency = cart.length > 0 ? cart[0].currency : 'DA';
+  }
+  const delivery = getCartDeliveryPrice();
+  const total = subtotal + delivery;
+  document.getElementById('cartTotalPrice').textContent = (total / 100).toFixed(2) + ' ' + currency;
+}
+
+async function submitCartOrder() {
+  const cart = getCart();
+  if (cart.length === 0) return;
+
+  const firstName = document.getElementById('cartFirstName').value.trim();
+  const lastName = document.getElementById('cartLastName').value.trim();
+  const province = document.getElementById('cartProvince').value;
+  const phone = document.getElementById('cartPhone').value.trim();
+
+  if (!firstName || !lastName || !province || !phone) {
+    alert(currentLang === 'ar' ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill in all required fields");
+    return;
+  }
+
+  // إرسال الـ product_id/bundle_id والـ quantity بالشكل الصحيح للخادم
+  const itemsPayload = cart.map(i => (
+    i.bundle_id
+      ? { bundle_id: Number(i.bundle_id), quantity: Number(i.quantity) }
+      : { product_id: Number(i.product_id), quantity: Number(i.quantity) }
+  ));
+
+  const payload = {
+    customer_first_name: firstName,
+    customer_last_name: lastName,
+    province: province,
+    phone: phone,
+    items: itemsPayload,
+    delivery_type: (function() {
+      const checked = document.querySelector('input[name="cartDeliveryType"]:checked');
+      return checked ? checked.value : 'home';
+    })(),
+  };
+
+  const btn = document.getElementById('cartSubmitBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`/stores/${STORE_ID}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.detail) ? data.detail : 'Error');
+
+    localStorage.removeItem(`cart_${STORE_ID}`);
+    alert(currentLang === 'ar' ? "تم إرسال طلبك بنجاح!" : "Order placed successfully!");
+    toggleCart();
+    location.reload();
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+updateCartBadge();
+</script>
+<script>
+(function(){
+  try {
+    let vid = localStorage.getItem("oxyde_visitor_id");
+    if (!vid) { vid = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("oxyde_visitor_id", vid); }
+    fetch("/track-view", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ path: location.pathname, visitor_id: vid }), keepalive: true }).catch(function(){});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
+
